@@ -43,3 +43,12 @@ class SlashClient:
 					route = http.Route("POST", f"/applications/{self.bot.user.id}/commands"),
 					json = command.ret_dict()
 				)
+
+	async def remove_command(self, name: str):
+		slashcmds = await self.get_commands()
+		checks = list(map(lambda a: a.name, slashcmds))
+		id = slashcmds[checks.index(name)].id
+
+		await self.bot.http.request(
+			route = http.Route("DELETE", f"/applications/{self.bot.user.id}/commands/{id}")
+		)
