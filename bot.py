@@ -25,4 +25,4 @@ async def aa(ctx):
 
 
 
-bot.run("NzQwNTY4NzY2MTk4NDQ4MTkw.Xyq6aA.aEi-KSd_V9YL3UX9pg3hSDZFmoM")
+bot.run(os.environ.get("TOKEN"))
