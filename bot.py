@@ -34,8 +34,8 @@ class test(SlashCommand):
 	def __init__(self):
 		super().__init__(
 			bot.slashclient, 
-			name="blep", 
-			description = "", 
+			name="test", 
+			description = "some description", 
 			options = [
 				{
 					"type": 3,
@@ -52,6 +52,6 @@ class test(SlashCommand):
 @bot.event
 async def on_ready():
 	print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-	bot.register_command(test())
+	await bot.slashclient.add_command(test())
 
 bot.run(os.environ.get("TOKEN"))
