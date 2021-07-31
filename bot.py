@@ -53,9 +53,14 @@ class test(SlashCommand):
 		await ctx.reply("something", flags = MessageFlags.EPHEMERAL, embed = embed, view = controls())
 
 class controls(ui.View):
+
     @ui.button(label="helo", custom_id="play_button")
     async def play_button(self, button: ui.Button, interaction: Interaction):
         await interaction.response.send_message(f"hi", ephemeral=True)
+
+    @ui.button(label="die", custom_id="asasas")
+    async def asasas(self, button: ui.Button, interaction: Interaction):
+        await interaction.response.send_message(f"no u go die", ephemeral=True)
 
 @bot.event
 async def on_ready():
