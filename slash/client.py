@@ -1,20 +1,35 @@
-from typing import Coroutine
+from typing import Coroutine, List, Tuple
+
+from discord.ui.item import Item
 from .models import *
 from .exceptions import *
-from discord import http
+from discord import http, ui
 from discord.ext import commands
+from discord.interactions import Interaction
 
 class SlashClient:
 	def __init__(self, bot: commands.Bot) -> None:
 		self.bot: commands.Bot = bot
 		self._listeners = {}
+		self._views: Dict[str, Tuple[ui.View, Item]] = {}
 		self.bot.add_listener(self.socket_resp, "on_socket_response")
 
 	async def socket_resp(self, data):
 		if data["t"] == "INTERACTION_CREATE":
-			if data['d']['data']['name'] in self._listeners:
-				context = await InteractionContext(self.bot).from_dict(data['d'])
-				await (self._listeners[context.data["name"]]).callback(context)
+			if data['d']['type'] == 2:
+				if data['d']['data']['name'] in self._listeners:
+					context = await InteractionContext(self.bot, self).from_dict(data['d'])
+					await (self._listeners[context.data["name"]]).callback(context)
+			elif data['d']['type'] == 3:
+				d = data['d']
+				interactctx = Interaction(data=d, state=self.bot._connection)
+				custom_id = interactctx.data['custom_id']
+				component_type = interactctx.data['component_type']
+
+				view, item = self._views[custom_id]
+
+				item.refresh_state(interactctx)
+				view._dispatch_item(item, interactctx)
 
 	async def get_commands(self) -> List[SlashCommand]:
 		data = await self.bot.http.request(
