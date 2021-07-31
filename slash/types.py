@@ -1,9 +1,11 @@
-from typing import Coroutine, List
+from typing import Coroutine, Dict, List, Tuple
 from discord.ext import commands
 import discord
-
+from discord import ui
+from discord.ui.item import Item
 class InteractionContext:
 	bot: commands.Bot
+	client: 'SlashClient'
 	version: int
 	type: int
 	token: str
@@ -34,6 +36,7 @@ class SlashCommand:
 class SlashClient:
 	bot: commands.Bot
 	_listeners: dict
+	_views: Dict[str, Tuple[ui.View, Item]]
 
 	async def get_commands(self) -> List['SlashCommand']:
 		...

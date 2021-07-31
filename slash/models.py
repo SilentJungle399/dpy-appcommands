@@ -1,14 +1,17 @@
 
+from slash.enums import MessageFlags
 from typing import Dict, List
 import discord
 from discord import http
 from discord.ext import commands
 from .types import SlashClient
 import requests
+from discord import ui
 
 class InteractionContext:
-	def __init__(self, bot: commands.Bot) -> None:
-		self.bot = bot
+	def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
+		self.bot: commands.Bot = bot
+		self.client: SlashClient = client
 		self.version: int = None
 		self.type: int = None
 		self.token: str = None
@@ -46,24 +49,32 @@ class InteractionContext:
 
 	async def reply(
 		self, 
-		content=None, *, 
-		tts=False,
-		embed=None,
-		allowed_mentions=None,
-		flags=None
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		flags: MessageFlags = None,
+		view: ui.View = None
 	):
+		ret = {
+			"content": content,
+			"flags": flags
+		}
 
 		if embed:
-			embed = embed.to_dict()
+			ret["embeds"] = [embed.to_dict()]
+
+		if view:
+			ret["components"] = view.to_components()
+			for i in view.children:
+				if i._provided_custom_id:
+					self.client._views[i.custom_id] = [view, i]
 
 		url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
 
 		json = {
 			"type": 4,
-			"data": {
-				"content": content,
-				"flags": flags
-			}
+			"data": ret
 		}
 
 		requests.post(url, json=json)
