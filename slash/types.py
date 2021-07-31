@@ -1,8 +1,10 @@
+from .enums import MessageFlags
 from typing import Coroutine, Dict, List, Tuple
 from discord.ext import commands
 import discord
 from discord import ui
 from discord.ui.item import Item
+
 class InteractionContext:
 	bot: commands.Bot
 	client: 'SlashClient'
@@ -17,6 +19,17 @@ class InteractionContext:
 	guild: discord.Guild
 
 	def from_dict(self, data: dict) -> 'InteractionContext':
+		...
+
+	async def reply(
+		self, 
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		flags: MessageFlags = None,
+		view: ui.View = None
+	) -> None:
 		...
 
 class SlashCommand:
