@@ -20,11 +20,11 @@ class SlashClient:
 				if data['d']['data']['name'] in self._listeners:
 					context = await InteractionContext(self.bot, self).from_dict(data['d'])
 					await (self._listeners[context.data["name"]]).callback(context)
+
 			elif data['d']['type'] == 3:
 				d = data['d']
 				interactctx = Interaction(data=d, state=self.bot._connection)
 				custom_id = interactctx.data['custom_id']
-				component_type = interactctx.data['component_type']
 
 				view, item = self._views[custom_id]
 
@@ -47,7 +47,7 @@ class SlashClient:
 	async def add_command(self, command: SlashCommand):
 		slashcmds = await self.get_commands()
 		if command.name in self._listeners:
-			raise CommandExists(f"Command {command.name} has already been registered!")
+			raise CommandExists(f"Command '{command.name}' has already been registered!")
 		else:
 			self._listeners[command.name] = command
 

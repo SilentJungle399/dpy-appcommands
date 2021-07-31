@@ -48,7 +48,7 @@ class SlashCommand:
 
 class SlashClient:
 	bot: commands.Bot
-	_listeners: dict
+	_listeners: Dict[str, SlashCommand]
 	_views: Dict[str, Tuple[ui.View, Item]]
 
 	async def get_commands(self) -> List['SlashCommand']:
