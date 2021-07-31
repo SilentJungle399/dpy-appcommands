@@ -1,8 +1,10 @@
 from discord.ext.commands.flags import flag
 from slash import *
 from discord.ext import commands
-from discord import http
+import discord
 import os
+from discord import ui
+from discord.interactions import Interaction
 import json
 from dotenv import load_dotenv
 
@@ -47,7 +49,13 @@ class test(SlashCommand):
 		)
 
 	async def callback(self, ctx: InteractionContext):
-		await ctx.reply("something", flags = MessageFlags.EPHEMERAL)
+		embed = discord.Embed(title = "smth")
+		await ctx.reply("something", flags = MessageFlags.EPHEMERAL, embed = embed, view = controls())
+
+class controls(ui.View):
+    @ui.button(label="helo", custom_id="play_button")
+    async def play_button(self, button: ui.Button, interaction: Interaction):
+        await interaction.response.send_message(f"hi", ephemeral=True)
 
 @bot.event
 async def on_ready():
