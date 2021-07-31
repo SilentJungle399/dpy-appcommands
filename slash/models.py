@@ -79,6 +79,41 @@ class InteractionContext:
 
 		requests.post(url, json=json)
 
+
+	async def follow(
+		self, 
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		flags: MessageFlags = None,
+		view: ui.View = None
+	):
+		ret = {
+			"content": content,
+			"flags": flags
+		}
+
+		if embed:
+			ret["embeds"] = [embed.to_dict()]
+
+		if view:
+			ret["components"] = view.to_components()
+			for i in view.children:
+				if i._provided_custom_id:
+					self.client._views[i.custom_id] = [view, i]
+
+		url = f"https://discord.com/api/v9/webhooks/{self.id}/{self.token}"
+
+		json = {
+			"type": 4,
+			"data": ret
+		}
+
+		requests.post(url, json=json)
+
+
+
 class SlashCommand:
 	def __init__(self, client: SlashClient, name: str = None, options: List[Dict] = None, description: str = None):
 		self.client = client
