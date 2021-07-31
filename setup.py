@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="slash",
-    version="0.1.0",
+    version="0.1.1",
     author="SilentJungle399",
     description="A simple module to use for slash commands in discord.py.",
     long_description=long_description,
