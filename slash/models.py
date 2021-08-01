@@ -53,13 +53,15 @@ class InteractionContext:
 		tts: bool = False,
 		embed: discord.Embed = None,
 		allowed_mentions = None,
-		flags: MessageFlags = None,
+		ephemeral: bool = False,
 		view: ui.View = None
 	):
 		ret = {
 			"content": content,
-			"flags": flags
 		}
+
+		if ephemeral:
+			ret["flags"] = 64
 
 		if embed:
 			ret["embeds"] = [embed.to_dict()]
@@ -77,8 +79,11 @@ class InteractionContext:
 			"data": ret
 		}
 
-		requests.post(url, json=json)
+		resp = requests.post(url, json=json)
 
+		self.client.log(f"Reply response - {resp.status_code}")
+
+		return resp.text
 
 	async def follow(
 		self, 
@@ -86,13 +91,15 @@ class InteractionContext:
 		tts: bool = False,
 		embed: discord.Embed = None,
 		allowed_mentions = None,
-		flags: MessageFlags = None,
+		ephemeral: bool = False,
 		view: ui.View = None
 	):
 		ret = {
 			"content": content,
-			"flags": flags
 		}
+
+		if ephemeral:
+			ret["flags"] = 64
 
 		if embed:
 			ret["embeds"] = [embed.to_dict()]
@@ -103,16 +110,53 @@ class InteractionContext:
 				if i._provided_custom_id:
 					self.client._views[i.custom_id] = [view, i]
 
-		url = f"https://discord.com/api/v9/webhooks/{self.id}/{self.token}"
+		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}"
 
-		json = {
-			"type": 4,
-			"data": ret
+		resp = requests.post(url, json = ret)
+
+		self.client.log(f"Follow msg response - {resp.status_code}")
+
+		return resp.text
+
+	async def edit(
+		self, 
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		ephemeral: bool = False,
+		view: ui.View = None
+	):
+		ret = {
+			"content": content,
 		}
 
-		requests.post(url, json=json)
+		if ephemeral:
+			ret["flags"] = 64
 
+		if embed:
+			ret["embeds"] = [embed.to_dict()]
 
+		if view:
+			ret["components"] = view.to_components()
+			for i in view.children:
+				if i._provided_custom_id:
+					self.client._views[i.custom_id] = [view, i]
+
+		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
+
+		resp = requests.patch(url, json=ret)
+
+		self.client.log(f"Reply edit response - {resp.status_code}")
+
+	async def delete(self):
+		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
+
+		resp = requests.delete(url)
+
+		self.client.log(f"Delete reply response - {resp.status_code}")
+
+		return resp.text
 
 class SlashCommand:
 	def __init__(self, client: SlashClient, name: str = None, options: List[Dict] = None, description: str = None):
