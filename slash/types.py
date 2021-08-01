@@ -29,7 +29,32 @@ class InteractionContext:
 		allowed_mentions = None,
 		flags: MessageFlags = None,
 		view: ui.View = None
-	) -> None:
+	) -> dict:
+		...
+
+	async def edit(
+		self, 
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		flags: MessageFlags = None,
+		view: ui.View = None
+	) -> dict:
+		...
+
+	async def follow(
+		self, 
+		content: str = None, *, 
+		tts: bool = False,
+		embed: discord.Embed = None,
+		allowed_mentions = None,
+		flags: MessageFlags = None,
+		view: ui.View = None
+	) -> dict:
+		...
+
+	async def delete(self) -> None:
 		...
 
 class SlashCommand:
