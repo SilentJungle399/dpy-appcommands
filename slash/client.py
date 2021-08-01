@@ -1,11 +1,12 @@
+import importlib
 from typing import Coroutine, List, Tuple
-
 from discord.ui.item import Item
 from .models import *
 from .exceptions import *
 from discord import http, ui
 from discord.ext import commands
 from discord.interactions import Interaction
+import sys
 
 class SlashClient:
 	def __init__(self, bot: commands.Bot, logging: bool = False) -> None:
@@ -65,11 +66,63 @@ class SlashClient:
 					json = command.ret_dict()
 				)
 
+	def reload_command(self, command: SlashCommand):
+		if command.name not in self._listeners:
+			raise CommandNotRegistered(f"Command '{command.name}' has not been registered.")
+		else:
+			self._listeners.pop(command.name)
+			self._listeners[command.name] = command
+			self.log(f"Slash command '{command.name}' reloaded!")
+
 	async def remove_command(self, name: str):
 		slashcmds = await self.get_commands()
 		checks = list(map(lambda a: a.name, slashcmds))
-		id = slashcmds[checks.index(name)].id
+		if name not in checks:
+			raise CommandDoesNotExists(f"Command '{name}' does not exist!")
+		else:
+			id = slashcmds[checks.index(name)].id
 
-		await self.bot.http.request(
-			route = http.Route("DELETE", f"/applications/{self.bot.user.id}/commands/{id}")
-		)
+			await self.bot.http.request(
+				route = http.Route("DELETE", f"/applications/{self.bot.user.id}/commands/{id}")
+			)
+
+	def load_extension(self, name: str):
+		spec = importlib.util.find_spec(name)
+		lib = importlib.util.module_from_spec(spec)
+
+		try:
+			spec.loader.exec_module(lib)
+		except Exception as e:
+			del sys.modules[name]
+			raise LoadFailed(f"Extension '{name}' could not be loaded!")
+
+		try:
+			setup = getattr(lib, 'setup')
+		except AttributeError:
+			raise LoadFailed(f"Extension '{name}' has no method 'setup'!")
+
+		try:
+			self.bot.loop.create_task(self.add_command(setup(self.bot)))
+		except Exception as e:
+			print(e)
+
+	def reload_extension(self, name: str):
+		
+		spec = importlib.util.find_spec(name)
+		lib = importlib.util.module_from_spec(spec)
+
+		try:
+			spec.loader.exec_module(lib)
+		except Exception as e:
+			del sys.modules[name]
+			raise LoadFailed(f"Extension '{name}' could not be loaded!")
+
+		try:
+			setup = getattr(lib, 'setup')
+		except AttributeError:
+			raise LoadFailed(f"Extension '{name}' has no method 'setup'!")
+
+		try:
+			self.reload_command(setup(self.bot))
+		except Exception as e:
+			print(e)
