@@ -56,3 +56,6 @@ class SlashClient:
 
 	async def add_command(self, command: SlashCommand):
 		...
+
+	def log(self, message: str):
+		...
