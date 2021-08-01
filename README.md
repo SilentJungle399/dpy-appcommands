@@ -22,30 +22,31 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or('?'))
 bot.slashclient = SlashClient(bot)
 
 class Blep(SlashCommand):
-	def __init__(self):
-		super().__init__(
-			bot.slashclient, 
-			name="blep", 
-			description = "Some blep description",
-			# A reference to discord docs for options
-			# https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-structure
-			options = [
-				{ 
-					"type": 3,
-					"name": "pleb",
-					"description": "some pleb description",
-					"required": False
-				}
-			]
-		)
+    def __init__(self):
+        super().__init__(
+            bot.slashclient, 
+            name="blep", 
+            description = "Some blep description",
 
-	async def callback(self, ctx: InteractionContext):
-		await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
+            # A reference to discord docs for options
+            # https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-structure
+            options = [
+                { 
+                    "type": 3,
+                    "name": "pleb",
+                    "description": "some pleb description",
+                    "required": False
+                }
+            ]
+        )
+
+    async def callback(self, ctx: InteractionContext):
+    await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
 
 @bot.event
 async def on_ready():
-	print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-	await bot.slashclient.add_command(Blep())
+    print(f'Logged on as {bot.user} (ID: {bot.user.id})')
+    await bot.slashclient.add_command(Blep())
 
 bot.run("TOKEN")
 ```
