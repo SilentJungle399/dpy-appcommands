@@ -1,11 +1,12 @@
 import setuptools
+import slash
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="slash",
-    version="0.1.1",
+    version=slash.__version__,
     author="SilentJungle399",
     description="A simple module to use for slash commands in discord.py.",
     long_description=long_description,
