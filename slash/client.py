@@ -8,11 +8,16 @@ from discord.ext import commands
 from discord.interactions import Interaction
 
 class SlashClient:
-	def __init__(self, bot: commands.Bot) -> None:
+	def __init__(self, bot: commands.Bot, logging: bool = False) -> None:
 		self.bot: commands.Bot = bot
+		self.logging: bool = logging
 		self._listeners = {}
 		self._views: Dict[str, Tuple[ui.View, Item]] = {}
 		self.bot.add_listener(self.socket_resp, "on_socket_response")
+
+	def log(self, message):
+		if self.logging:
+			print(message)
 
 	async def socket_resp(self, data):
 		if data["t"] == "INTERACTION_CREATE":
@@ -50,6 +55,7 @@ class SlashClient:
 			raise CommandExists(f"Command '{command.name}' has already been registered!")
 		else:
 			self._listeners[command.name] = command
+			self.log(f"Slash command '{command.name}' registered!")
 
 			checks = list(map(lambda a: a.name, slashcmds))
 			
