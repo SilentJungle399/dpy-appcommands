@@ -41,7 +41,7 @@ class Blep(SlashCommand):
         )
 
     async def callback(self, ctx: InteractionContext):
-    await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
+        await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
 
 @bot.event
 async def on_ready():
