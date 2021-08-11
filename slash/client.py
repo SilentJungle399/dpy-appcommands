@@ -46,7 +46,8 @@ class SlashClient:
 		)
 		ret = []
 		for i in data:
-			ret.append(SlashCommand.from_dict(self, i))
+			if i["type"] == 1:
+				ret.append(SlashCommand.from_dict(self, i))
 
 		return ret
 
