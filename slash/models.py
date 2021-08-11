@@ -171,12 +171,18 @@ class SlashCommand:
 		self.application_id = int(data["application_id"])
 		self.id = int(data["id"])
 		self.name = data["name"]
-		self.description = data["description"]
 		self.default_permission = data["default_permission"]
 		self.type = int(data["type"])
-		self.options = data["options"]
+		if "description" in data:
+			description = data["description"]
+		else:
+			description = None
+		if "options" in data:
+			options = data["options"]
+		else:
+			options = []
 
-		return self(client, name = data["name"], description = data["description"], options = data["options"])
+		return self(client, name = data["name"], description = description, options = options)
 
 	def ret_dict(self) -> dict:
 		ret = {
