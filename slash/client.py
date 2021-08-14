@@ -17,6 +17,7 @@ class SlashClient:
         self._listeners = {}
         self._views: Dict[str, Tuple[ui.View, Item]] = {}
         self.bot.add_listener(self.socket_resp, "on_interaction")
+        self.command = command
 
     def log(self, message):
         if self.logging:
