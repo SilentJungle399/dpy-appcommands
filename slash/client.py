@@ -104,6 +104,8 @@ class SlashClient:
                 ret.append(SlashCommand.from_dict(self, i))
 
         return ret
+    def get_command(self, name: str):
+        return self._listeners.get(name)
 
     async def add_command(self, command: SlashCommand):
         """Adds a slash command to bot
@@ -121,9 +123,6 @@ class SlashClient:
         if command.name in self._listeners:
             raise CommandExists(f"Command '{command.name}' has already been registered!")
         else:
-            self._listeners[command.name] = command
-            self.log(f"Slash command '{command.name}' registered!")
-
             checks = list(map(lambda a: a.name, slashcmds))
             
             if command.name not in checks:
@@ -131,6 +130,9 @@ class SlashClient:
                     route = http.Route("POST", f"/applications/{self.bot.user.id}/commands"),
                     json = command.ret_dict()
                 )
+            self._listeners[command.name] = command
+            self.log(f"Slash command '{command.name}' registered!")
+
 
     def reload_command(self, command: SlashCommand):
         if command.name not in self._listeners:
