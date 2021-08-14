@@ -167,6 +167,12 @@ class SlashCommand:
         self.options = options
         self.description = description or ""
 
+    def __repr__(self):
+        return "<SlashCommmand name={0} description={1.description}>".format(self.name, self)
+
+    def __str__(self):
+        return self.__repr__()
+
     @classmethod
     def from_dict(self, client: SlashClient, data: dict) -> 'SlashCommand':
         self.version = int(data["version"])
