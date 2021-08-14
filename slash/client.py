@@ -4,6 +4,7 @@ from discord.ui.item import Item
 from .models import *
 from .exceptions import *
 from discord import http, ui
+from discord.enums import InteractionType
 from discord.ext import commands
 from discord.interactions import Interaction
 import sys
@@ -14,28 +15,27 @@ class SlashClient:
 		self.logging: bool = logging
 		self._listeners = {}
 		self._views: Dict[str, Tuple[ui.View, Item]] = {}
-		self.bot.add_listener(self.socket_resp, "on_socket_response")
+		self.bot.add_listener(self.socket_resp, "on_interaction")
 
 	def log(self, message):
 		if self.logging:
 			print(message)
 
-	async def socket_resp(self, data):
-		if data["t"] == "INTERACTION_CREATE":
-			if data['d']['type'] == 2:
-				if data['d']['data']['name'] in self._listeners:
-					context = await InteractionContext(self.bot, self).from_dict(data['d'])
-					await (self._listeners[context.data["name"]]).callback(context)
+	async def socket_resp(self, interaction):
+		if interaction.type == InteractionType.application_command:
+			if interaction.data['name'] in self._listeners:
+				context = await InteractionContext(self.bot, self).from_dict(data['d'])
+				await (self._listeners[context.data["name"]]).callback(context)
 
-			elif data['d']['type'] == 3:
-				d = data['d']
-				interactctx = Interaction(data=d, state=self.bot._connection)
-				custom_id = interactctx.data['custom_id']
 
-				view, item = self._views[custom_id]
+		elif interaction.type == InteractionType.component:
+			interactctx = interaction
+			custom_id = interactctx.data['custom_id']
 
-				item.refresh_state(interactctx)
-				view._dispatch_item(item, interactctx)
+			view, item = self._views[custom_id]
+
+			item.refresh_state(interactctx)
+			view._dispatch_item(item, interactctx)
 
 	async def get_commands(self) -> List[SlashCommand]:
 		data = await self.bot.http.request(
