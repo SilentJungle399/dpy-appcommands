@@ -7,6 +7,7 @@ from discord.ext import commands
 from .types import SlashClient
 import requests
 from discord import ui
+import asyncio
 
 class InteractionContext:
 	def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
@@ -159,7 +160,12 @@ class InteractionContext:
 		return resp.text
 
 class SlashCommand:
-	def __init__(self, client: SlashClient, name: str = None, options: List[Dict] = None, description: str = None):
+	def __init__(self, client: SlashClient, name: str = None, options: List[Dict] = None, description: str = None, callback = None):
+		if callback is not None:
+			if not asyncio.iscoroutinefunction(callback):
+				raise TypeError('Callback must be a coroutine.')
+			self.callback = callback
+
 		self.client = client
 		self.name = name
 		self.options = options
@@ -195,3 +201,11 @@ class SlashCommand:
 
 	async def callback(self, ctx: InteractionContext):
 		pass
+
+def command(*arg,**kwargs):
+    def wrapper(func):
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError('Callback must be a coroutine.')
+        result = SlashCommand(*args, **kwargs, callback = func)
+        return result
+    return wrapper
