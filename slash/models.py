@@ -165,11 +165,12 @@ class SlashCommand:
 			if not asyncio.iscoroutinefunction(callback):
 				raise TypeError('Callback must be a coroutine.')
 			self.callback = callback
-
+			self.name = name or callback.__name__
+		else:
+			self.name = name or ""
 		self.client = client
-		self.name = name
 		self.options = options
-		self.description = description
+		self.description = description or ""
 
 	@classmethod
 	def from_dict(self, client: SlashClient, data: dict) -> 'SlashCommand':
