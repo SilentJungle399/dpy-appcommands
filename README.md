@@ -51,7 +51,8 @@ async def test(ctx):
 
 # or
 
-@bot.slashclient.command(bot.slashclient, name="test2", description="test")
+@bot.slashclient.command(n
+ame="test2", description="test")
 async def test(ctx):
     await ctx.reply(f"tested {ctx.author}")
 
