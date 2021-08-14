@@ -39,6 +39,8 @@ class SlashClient:
 			view._dispatch_item(item, interactctx)
 
 	async def get_commands(self) -> List[SlashCommand]:
+		while not self.bot.is_ready():
+			await self.bot.wait_until_ready()
 		data = await self.bot.http.request(
 			route = http.Route(
 				"GET",
