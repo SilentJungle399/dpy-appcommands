@@ -1,6 +1,7 @@
 import importlib
 from typing import Coroutine, List, Tuple
-from discord.ui.item import Item
+import discord
+Item = discord.ui.Item
 from .models import *
 from .exceptions import *
 from discord import http, ui
