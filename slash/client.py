@@ -1,5 +1,5 @@
 import importlib
-from typing import Coroutine, List, Tuple
+from typing import Coroutine, List, Tuple, Union
 import discord
 Item = discord.ui.Item
 from .models import *
@@ -11,9 +11,25 @@ from discord.interactions import Interaction
 import sys
 
 class SlashClient:
-
-    def __init__(self, bot: commands.Bot, logging: bool = False) -> None:
+    """Slash Client handler class for bot
+    
+    Parameters
+    -----------
+    bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
+        Your dpy bot
+    logging: bool
+        prints all the logs of this module, defaults to False
+    
+    Raises
+    -------
+    ValueError
+        The bot has already a slashclient registered with this module
+    """
+    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], logging: bool = False) -> None:
         self.bot: commands.Bot = bot
+        if hasattr(bot, "slashclient"):
+            raise ValueError("Bot has already a slashclient registered with this module")
+        self.bot.slashclient = self
         self.logging: bool = logging
         self._listeners = {}
         self._views: Dict[str, Tuple[ui.View, Item]] = {}
@@ -21,6 +37,12 @@ class SlashClient:
         self.command = command
 
     def log(self, message):
+        """Logs the works
+        
+        Parameters
+        -----------
+        message
+            The message which is to be logged"""
         if self.logging:
             print(message)
 
@@ -40,6 +62,7 @@ class SlashClient:
             view._dispatch_item(item, interactctx)
 
     async def get_commands(self) -> List[SlashCommand]:
+        """Gives a list of slash command currently the bot have"""
         while not self.bot.is_ready():
             await self.bot.wait_until_ready()
         data = await self.bot.http.request(
@@ -56,6 +79,17 @@ class SlashClient:
         return ret
 
     async def add_command(self, command: SlashCommand):
+        """Adds a slash command to bot
+
+        Parameters
+        -----------
+        command: :class:`~slash.SlashCommand`
+            The command to be added
+        
+        Raises
+        -------
+        CommandExists
+            That slash cmd is already in bot"""
         slashcmds = await self.get_commands()
         if command.name in self._listeners:
             raise CommandExists(f"Command '{command.name}' has already been registered!")
