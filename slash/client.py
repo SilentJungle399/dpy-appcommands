@@ -11,6 +11,7 @@ from discord.interactions import Interaction
 import sys
 
 class SlashClient:
+
     def __init__(self, bot: commands.Bot, logging: bool = False) -> None:
         self.bot: commands.Bot = bot
         self.logging: bool = logging
