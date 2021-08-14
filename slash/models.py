@@ -155,7 +155,7 @@ class InteractionContext:
         return resp.text
 
 class SlashCommand:
-    def __init__(self, client: SlashClient, callback = None, *,name: str, description: str, options: List[Dict] = None):
+    def __init__(self, client: SlashClient, *,name: str, description: str, options: List[Dict] = None, callback = None):
         if callback is not None:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
@@ -202,7 +202,7 @@ def command(*args,**kwargs):
     def wrapper(func):
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
-        result = SlashCommand(callback=func, *args, **kwargs)
+        result = SlashCommand(*args, **kwargs, callback=None)
         result.client.bot.loop.create_task(result.client.add_command(result))
         return func
     return wrapper
