@@ -43,6 +43,18 @@ class Blep(SlashCommand):
     async def callback(self, ctx: InteractionContext):
         await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
 
+# or
+
+@command(bot.slashclient, name="test", description="test")
+async def test(ctx):
+    await ctx.reply("tested")
+
+# or
+
+@bot.slashclient.command(bot.slashclient, name="test2", description="test")
+async def test(ctx):
+    await ctx.reply(f"tested {ctx.author}")
+
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
