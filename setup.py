@@ -26,7 +26,7 @@ if version.endswith(('a', 'b', 'rc')):
 
 setuptools.setup(
     name="slash",
-    version=slash.__version__,
+    version=version,
     author="SilentJungle399",
     description="A simple module to use for slash commands in discord.py.",
     long_description=long_description,
