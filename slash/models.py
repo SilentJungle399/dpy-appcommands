@@ -202,7 +202,7 @@ class SlashCommand:
 	async def callback(self, ctx: InteractionContext):
 		pass
 
-def command(*arg,**kwargs):
+def command(*args,**kwargs):
     def wrapper(func):
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
