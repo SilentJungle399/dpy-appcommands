@@ -207,6 +207,6 @@ def command(*args,**kwargs):
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
         result = SlashCommand(*args, **kwargs, callback = func)
-        result.client.bot.loop.run_until_complete(result.client.add_command(result))
-        return result
+        result.client.bot.loop.create_task(result.client.add_command(result))
+        return func
     return wrapper
