@@ -25,9 +25,8 @@ class SlashClient:
 	async def socket_resp(self, interaction):
 		if interaction.type == InteractionType.application_command:
 			if interaction.data['name'] in self._listeners:
-				context = await InteractionContext(self.bot, self).from_dict(data['d'])
+				context = await InteractionContext(self.bot, self).from_interaction(interaction)
 				await (self._listeners[context.data["name"]]).callback(context)
-
 
 		elif interaction.type == InteractionType.component:
 			interactctx = interaction
