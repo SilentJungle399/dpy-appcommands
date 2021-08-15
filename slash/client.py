@@ -155,6 +155,12 @@ class SlashClient:
             self.log(f"Slash command '{command.name}' reloaded!")
 
     async def remove_command(self, name: str):
+        """Removes command from the name given
+       
+        Parameters
+        ------------
+        name: str
+            Name of the command"""
         slashcmds = await self.get_commands()
         checks = list(map(lambda a: a.name, slashcmds))
         if name not in checks:
@@ -187,7 +193,6 @@ class SlashClient:
             print(e)
 
     def reload_extension(self, name: str):
-        
         spec = importlib.util.find_spec(name)
         lib = importlib.util.module_from_spec(spec)
 
