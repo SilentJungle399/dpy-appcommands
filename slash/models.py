@@ -35,10 +35,10 @@ class InteractionContext:
         if isinstance(interaction.user, discord.Member):
             self.guild = self.user.guild
             
-        if interaction.channel_id is not None:
+        if interaction.channel_id is not None and self.guild:
             self.channel = self.guild.get_channel(interaction.channel_id) or await self.guild.fetch_channel(interaction.channel_id)
-            if not self.channel:
-                self.channel = self.bot.get_channel(interaction.channel_id) or await self.bot.fetch_channel(interaction.channel_id)
+        elif interaction.channel_id is not None:
+            self.channel = await self.user._get_channel()
 
         
         return self
@@ -216,23 +216,6 @@ class SlashCommand:
         ret = {**ret, **self._extras}
         return ret
 
-    def subcommand(self, *args,**kwargs):
-        def wrapper(func):
-            if not asyncio.iscoroutinefunction(func):
-                raise TypeError('Callback must be a coroutine.')
-            result = SlashCommand(self.client, *args, **kwargs, callback=func, extras={"type": 1})
-            result.client.bot.loop.create_task(result.client.add_command(result))
-            return result
-        return wrapper
-
-    def group(self, *args,**kwargs):
-        def wrapper(func):
-            if not asyncio.iscoroutinefunction(func):
-                raise TypeError('Callback must be a coroutine.')
-            result = SlashCommand(self.client, *args, **kwargs, callback=func, extras={"type": 2})
-            result.client.bot.loop.create_task(result.client.add_command(result))
-            return result
-        return wrapper
 
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
