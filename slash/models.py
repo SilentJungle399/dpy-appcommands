@@ -212,12 +212,12 @@ class SlashCommand:
             self.name = name or callback.__name__
             callback.__slash_command__ = self
             self.callback = callback
-            unwrap = unwrap_function(function)
+            unwrap = unwrap_function(callback)
             try:
                 globalns = unwrap.__globals__
             except:
                 globalns = {}
-            self.params = get_signature_parameters(function, globalns)
+            self.params = get_signature_parameters(callback, globalns)
         else:
             self.name = name
         self.client = client
