@@ -216,7 +216,7 @@ class SlashCommand:
         ret = {**ret, **self._extras}
         return ret
 
-    def subcommand(*args,**kwargs):
+    def subcommand(self, *args,**kwargs):
         def wrapper(func):
             if not asyncio.iscoroutinefunction(func):
                 raise TypeError('Callback must be a coroutine.')
@@ -225,7 +225,7 @@ class SlashCommand:
             return result
         return wrapper
 
-    def group(*args,**kwargs):
+    def group(self, *args,**kwargs):
         def wrapper(func):
             if not asyncio.iscoroutinefunction(func):
                 raise TypeError('Callback must be a coroutine.')
