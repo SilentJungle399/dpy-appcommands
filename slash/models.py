@@ -168,7 +168,7 @@ class Option:
 
 
 class SlashCommand:
-    def __init__(self, client: SlashClient, name: str, description: str, options: List[Option] = None, callback = None, extras: dict = {}):
+    def __init__(self, client: SlashClient, name: str, description: str, options: List[Option] = [], callback = None, extras: dict = {}):
         if callback is not None:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
