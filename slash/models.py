@@ -209,8 +209,8 @@ class SlashCommand:
                 raise TypeError('Callback must be a coroutine.')
             result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 1})
             result.client.bot.loop.create_task(result.client.add_command(result))
-        return result
-    return wrapper
+            return result
+        return wrapper
 
     def group(*args,**kwargs):
         def wrapper(func):
@@ -218,8 +218,8 @@ class SlashCommand:
                 raise TypeError('Callback must be a coroutine.')
             result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 2})
             result.client.bot.loop.create_task(result.client.add_command(result))
-        return result
-    return wrapper
+            return result
+        return wrapper
 
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
