@@ -220,7 +220,7 @@ class SlashCommand:
         def wrapper(func):
             if not asyncio.iscoroutinefunction(func):
                 raise TypeError('Callback must be a coroutine.')
-            result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 1})
+            result = SlashCommand(self.slashclient, *args, **kwargs, callback=func, extras={"type": 1})
             result.client.bot.loop.create_task(result.client.add_command(result))
             return result
         return wrapper
@@ -229,7 +229,7 @@ class SlashCommand:
         def wrapper(func):
             if not asyncio.iscoroutinefunction(func):
                 raise TypeError('Callback must be a coroutine.')
-            result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 2})
+            result = SlashCommand(self.slashclient, *args, **kwargs, callback=func, extras={"type": 2})
             result.client.bot.loop.create_task(result.client.add_command(result))
             return result
         return wrapper
