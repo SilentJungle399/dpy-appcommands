@@ -155,16 +155,17 @@ class InteractionContext:
         return resp.text
 
 class SlashCommand:
-    def __init__(self, client: SlashClient, name: str, description: str, options: List[Dict] = None, callback = None, extras: dict):
+    def __init__(self, client: SlashClient, name: str, description: str, options: List[Option] = None, callback = None, extras: dict = {}):
         if callback is not None:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
-            self.callback = callback
             self.name = name or callback.__name__
+            callback.__slash_command__ = self
+            self.callback = callback
         else:
             self.name = name
         self.client = client
-        self._extras
+        self._extras = extras
         self.options = options
         self.description = description or ""
 
@@ -181,13 +182,13 @@ class SlashCommand:
         self.id = int(data["id"])
         self.name = data["name"]
         self.default_permission = data["default_permission"]
-        self.type = int(data["type"])
+        self.type = int(data["type"]) if data.get("type", None) is not None else None
         if "description" in data:
             description = data["description"]
         else:
             description = None
         if "options" in data:
-            options = data["options"]
+            options = list(Option(**option) for option in data["options"])
         else:
             options = []
 
@@ -197,14 +198,43 @@ class SlashCommand:
         ret = {
             "name": self.name,
             "description": self.description,
-            "options": self.options
+            "options": list(d.ret_dict() for d in options)
         }
-        ret = {**ret, **self.extras}
+        ret = {**ret, **self._extras}
         return ret
+
+    def subcommand(*args,**kwargs):
+        def wrapper(func):
+            if not asyncio.iscoroutinefunction(func):
+                raise TypeError('Callback must be a coroutine.')
+            result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 1})
+            result.client.bot.loop.create_task(result.client.add_command(result))
+        return result
+    return wrapper
+
+    def group(*args,**kwargs):
+        def wrapper(func):
+            if not asyncio.iscoroutinefunction(func):
+                raise TypeError('Callback must be a coroutine.')
+            result = SlashCommand(*args, **kwargs, callback=func, extras={"type": 2})
+            result.client.bot.loop.create_task(result.client.add_command(result))
+        return result
+    return wrapper
 
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
 
+class Option:
+    def __init__(self, name: str, description: str, type: int = 3, required: bool = True):
+        if optype not in (3,4,5,6,7,8,9,10):
+            raise ValueError("type should be one of the values (3,4,5,6,7,8,9,10) not {}".format(optype))
+        self.name = name
+        self.description = description
+        self.type = type
+        self.required = True
+
+    def ret_dict(self):
+        return {"name": self.name,"description": self.description,"type": self.type,"required": self.required}
 
 def command(*args,**kwargs):
     def wrapper(func):
@@ -212,5 +242,5 @@ def command(*args,**kwargs):
             raise TypeError('Callback must be a coroutine.')
         result = SlashCommand(*args, **kwargs, callback=func)
         result.client.bot.loop.create_task(result.client.add_command(result))
-        return func
+        return result
     return wrapper
