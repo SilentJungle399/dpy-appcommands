@@ -154,6 +154,19 @@ class InteractionContext:
 
         return resp.text
 
+class Option:
+    def __init__(self, name: str, description: str, type: int = 3, required: bool = True):
+        if optype not in (3,4,5,6,7,8,9,10):
+            raise ValueError("type should be one of the values (3,4,5,6,7,8,9,10) not {}".format(optype))
+        self.name = name
+        self.description = description
+        self.type = type
+        self.required = True
+
+    def ret_dict(self):
+        return {"name": self.name,"description": self.description,"type": self.type,"required": self.required}
+
+
 class SlashCommand:
     def __init__(self, client: SlashClient, name: str, description: str, options: List[Option] = None, callback = None, extras: dict = {}):
         if callback is not None:
@@ -224,17 +237,6 @@ class SlashCommand:
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
 
-class Option:
-    def __init__(self, name: str, description: str, type: int = 3, required: bool = True):
-        if optype not in (3,4,5,6,7,8,9,10):
-            raise ValueError("type should be one of the values (3,4,5,6,7,8,9,10) not {}".format(optype))
-        self.name = name
-        self.description = description
-        self.type = type
-        self.required = True
-
-    def ret_dict(self):
-        return {"name": self.name,"description": self.description,"type": self.type,"required": self.required}
 
 def command(*args,**kwargs):
     def wrapper(func):
