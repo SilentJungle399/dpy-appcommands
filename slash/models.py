@@ -64,7 +64,9 @@ class InteractionContext:
         cmd = self.bot.slashclient._listeners.get(self.data.get("name"), None)
         if cmd is not None and "options" in self.data:
             for k,v in cmd.params.items():
-                print(k,v)
+                for opt in self.data.get("options"):
+                    if k == opt.get("name",""):
+                        self.kwargs[k] = opt.get("value","")
         self.application_id = interaction.application_id
         self.user = interaction.user
         self.guild = None
