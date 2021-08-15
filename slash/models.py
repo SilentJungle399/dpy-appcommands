@@ -61,7 +61,10 @@ class InteractionContext:
         self.token = interaction.token
         self.id = interaction.id
         self.data = interaction.data
-        for k,v in d.get
+        cmd = self.bot.slashclient._listeners.get(self.data.get("name"), None):
+        if cmd is not None and "options" in self.data:
+            for k,v in cmd.params.items():
+                print(k,v)
         self.application_id = interaction.application_id
         self.user = interaction.user
         self.guild = None
