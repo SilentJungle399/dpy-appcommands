@@ -63,12 +63,12 @@ class SlashClient:
             return func
         return decorator
 
-    def log(self, message):
+    def log(self, message: str):
         """Logs the works
         
         Parameters
         -----------
-        message
+        message: str
             The message which is to be logged"""
         if self.logging:
             print(message)
@@ -117,14 +117,15 @@ class SlashClient:
         
         Raises
         -------
-        CommandExists
+        .CommandExists
             That slash cmd is already in bot"""
         slashcmds = await self.get_commands()
         if command.name in self._listeners:
             raise CommandExists(f"Command '{command.name}' has already been registered!")
         else:
             checks = list(map(lambda a: a.name, slashcmds))
-            
+            if command in slashcmds:
+                await self.remove_command(command.name)
             if command.name not in checks:
                 await self.bot.http.request(
                     route = http.Route("POST", f"/applications/{self.bot.user.id}/commands"),
@@ -135,6 +136,17 @@ class SlashClient:
 
 
     def reload_command(self, command: SlashCommand):
+        """Reloads a slash command
+
+        Parameters
+        -----------
+        command: :class:`~slash.SlashCommand`
+            The command which is to be reloaded
+
+        Raises
+        --------
+        .CommandNotRegistered
+            That command is not registered"""
         if command.name not in self._listeners:
             raise CommandNotRegistered(f"Command '{command.name}' has not been registered.")
         else:
