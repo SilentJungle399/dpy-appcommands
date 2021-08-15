@@ -211,7 +211,7 @@ class SlashCommand:
         ret = {
             "name": self.name,
             "description": self.description,
-            "options": list(d.ret_dict() for d in options)
+            "options": list(d.ret_dict() for d in self.options)
         }
         ret = {**ret, **self._extras}
         return ret
