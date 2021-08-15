@@ -7,6 +7,38 @@ from .types import SlashClient
 import requests
 from discord import ui
 import asyncio
+import inspect, functools
+
+def unwrap_function(function):
+    partial = functools.partial
+    while True:
+        if hasattr(function, '__wrapped__'):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
+
+
+def get_signature_parameters(function, globalns) -> Dict[str, inspect.Parameter]:
+    signature = inspect.signature(function)
+    params = {}
+    cache = {}
+    eval_annotation = discord.utils.evaluate_annotation
+    for name, parameter in signature.parameters.items():
+        annotation = parameter.annotation
+        if annotation is parameter.empty:
+            params[name] = parameter
+            continue
+        if annotation is None:
+            params[name] = parameter.replace(annotation=type(None))
+            continue
+
+        annotation = eval_annotation(annotation, globalns, globalns, cache)
+
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
 
 class InteractionContext:
     def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
@@ -21,6 +53,7 @@ class InteractionContext:
         self.user: Union[discord.Member, discord.User] = None
         self.channel: discord.TextChannel = None
         self.guild: discord.Guild = None
+        self.kwargs: dict = {}
 
     async def from_interaction(self, interaction) -> 'InteractionContext':
         self.version = interaction.version
@@ -28,6 +61,7 @@ class InteractionContext:
         self.token = interaction.token
         self.id = interaction.id
         self.data = interaction.data
+        for k,v in d.get
         self.application_id = interaction.application_id
         self.user = interaction.user
         self.guild = None
@@ -175,6 +209,12 @@ class SlashCommand:
             self.name = name or callback.__name__
             callback.__slash_command__ = self
             self.callback = callback
+            unwrap = unwrap_function(function)
+            try:
+                globalns = unwrap.__globals__
+            except:
+                globalns = {}
+            self.params = get_signature_parameters(function, globalns)
         else:
             self.name = name
         self.client = client
