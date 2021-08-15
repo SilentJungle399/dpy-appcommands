@@ -104,7 +104,11 @@ class SlashClient:
                 ret.append(SlashCommand.from_dict(self, i))
 
         return ret
+
     def get_command(self, name: str):
+        """Gives a command registered in this module
+        name: str
+            the name from which command is to be found"""
         return self._listeners.get(name)
 
     async def add_command(self, command: SlashCommand):
