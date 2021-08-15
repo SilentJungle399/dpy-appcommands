@@ -77,7 +77,7 @@ class SlashClient:
         if interaction.type == InteractionType.application_command:
             if interaction.data['name'] in self._listeners:
                 context = await InteractionContext(self.bot, self).from_interaction(interaction)
-                await (self._listeners[context.data["name"]]).callback(context)
+                await (self._listeners[context.data["name"]]).callback(context,**context.kwargs)
 
         elif interaction.type == InteractionType.component:
             interactctx = interaction
