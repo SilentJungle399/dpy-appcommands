@@ -36,9 +36,9 @@ class InteractionContext:
             self.guild = self.user.guild
             
         if interaction.channel_id is not None:
-            self.channel = self.guild.get_channel(interaction.channel_id)
+            self.channel = self.guild.get_channel(interaction.channel_id) or await self.guild.fetch_channel(interaction.channel_id)
             if not self.channel:
-                self.channel = await self.guild.fetch_channel(interaction.channel_id)
+                self.channel = self.bot.get_channel(interaction.channel_id) or await self.bot.fetch_channel(interaction.channel_id)
 
         
         return self
