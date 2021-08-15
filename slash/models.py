@@ -156,7 +156,7 @@ class InteractionContext:
 
 class Option:
     def __init__(self, name: str, description: str, type: int = 3, required: bool = True):
-        if optype not in (3,4,5,6,7,8,9,10):
+        if type not in (3,4,5,6,7,8,9,10):
             raise ValueError("type should be one of the values (3,4,5,6,7,8,9,10) not {}".format(optype))
         self.name = name
         self.description = description
