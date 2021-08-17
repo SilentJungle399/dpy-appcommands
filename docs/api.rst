@@ -65,4 +65,3 @@ slash.models Module
     :members:
 
 .. autofunction:: command
-    :members:
