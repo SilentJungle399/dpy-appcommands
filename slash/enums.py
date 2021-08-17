@@ -20,10 +20,16 @@ class OptionType(IntEnum):
 
     @classmethod
     def from_type(cls, t: type):
-        """
-        Get a specific OptionType from a type (or object).
-        :param t: The type or object to get a OptionType for.
-        :return: :class:`~slash.models.OptionType` or ``None``
+        """Get a specific OptionType from a type (or object).
+
+        Parameters
+        -----------
+        t: :class:`~type`
+            The type or object to get a OptionType for.
+
+        Returns
+        ---------
+        :class:`~slash.models.OptionType` or ``None``
         """
 
         if issubclass(t, str):
