@@ -102,7 +102,7 @@ autodoc_member_order = "bysource"
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'discord': ('https://discordpy.readthedocs.io/en/latest', None),
+    'discord': ('https://discordpy.readthedocs.io/en/master', None),
     'aiohttp': ('https://docs.aiohttp.org/en/stable/', None)
 }
 
