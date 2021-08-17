@@ -81,24 +81,26 @@ def generate_options(function, description: str = "No description."):
 class InteractionContext:
     """The ctx param given in CMD callbacks
     
+    **Attributes**
+
     Attributes
     ------------
-    bot: Union[:class:`~discord.ext.commands.Bot`,:class:`~discord.ext.commands.AutoShardedBot`]
+    bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
         The discord bot
     client: :class:`~slash.client.SlashClient`
         The slashclient on which this context is used 
-    type: `int`
+    type: :class:`~int`
         Interaction type 
     guild: Union[:class:`~discord.Guild`, None]
         The guild in which command is fired, None if it is in DMs 
     channel: Union[:class:`~discord.TextChannel`, :class:`~discord.DMChannel`]
         The channel in which command is triggered
-    id: `int`
+    id: :class:`~int`
         id of this interaction
-  user: Union[:class:`~discord.User`,:class:`~discord.Member`]
-      The user who fired this cmd 
-  token: `str`
-      token of this interaction, (valid for 15 mins)"""
+    user: Union[:class:`~discord.User`, :class:`~discord.Member`]
+        The user who fired this cmd 
+    token: :class:`~str`
+        token of this interaction, (valid for 15 mins)"""
     def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
         self.bot: commands.Bot = bot
         self.client: SlashClient = client
@@ -255,9 +257,9 @@ class Choice:
     
     Parameters 
     ------------
-    name: `str`
+    name: :class:`~str`
         name of the choice, (required)
-    value: Optional[`str`]
+    value: Optional[:class:`~str`]
         value of the choice used for backends, (optional)"""
     def __init__(self, name: str, value: Optional[str] = None):
         self.name = name
@@ -275,13 +277,13 @@ class Option:
     
     Parameters 
     ------------
-    name: `str`
+    name: :class:`~str`
         name of the Option, (required)
-    description: Optional[`str`]
+    description: Optional[:class:`~str`]
         description of option, (optional)
-    type: Optional[`int`]
+    type: Optional[:class:`~int`]
         the type of option, (optional)
-    required: Optional[`bool`]
+    required: Optional[:class:`~bool`]
         whether the option is required
     choices: Optional[List[:class:`~slash.models.Choice`]]
         The choices for this option
@@ -359,7 +361,6 @@ class SubCommand:
 
         self.client = client
         self.description = description
-        self.full_name = f"{parent} {self.name}"
 
     def to_dict(self):
         ret = {
@@ -473,9 +474,9 @@ class SlashCommand:
     ------------
     client: :class:`~slash.client.SlashClient`
        Your SlashClient instance, (required)
-    name: str
+    name: :class:`~str`
        Name of the cmd, (required)
-    description: Optional[`str`]
+    description: Optional[:class:`~str`]
        description of the cmd, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
        options for your command, (optional)
@@ -519,7 +520,6 @@ class SlashCommand:
         self.client = client
         self.description = description or ""
         self.options.extend(subcommands)
-        #print(self.options)
 
     def __repr__(self):
         return "<SlashCommmand name={0} description={1.description}>".format(
@@ -580,9 +580,9 @@ def command(*args, **kwargs):
     ------------
     client: :class:`~slash.client.SlashClient`
         Your slashclient instance, (required)
-    name: str
+    name: :class:`~str`
         Name of the command, (required)
-    description: Optional[`str`]
+    description: Optional[:class:`~str`]
         Description of the command, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
