@@ -5,5 +5,6 @@ Welcome to slash documentation
    :caption: Contents:
 
    quickstart
+   gettingstarted
    api
 
