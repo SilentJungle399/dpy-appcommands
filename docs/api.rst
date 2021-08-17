@@ -10,7 +10,7 @@ slash.client Module
 
 .. currentmodule:: slash.client
 
-.. autoclass:: Client
+.. autoclass:: SlashClient
     :members:
 
 slash.enums Module
@@ -49,6 +49,8 @@ slash.exceptions Module
 
 slash.models Module
 ----------------------------------
+
+.. currentmodule:: slash.models
 
 .. autoclass:: InteractionContext
     :members:
