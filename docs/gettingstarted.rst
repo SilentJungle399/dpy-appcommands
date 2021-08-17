@@ -109,4 +109,27 @@ Custom Options
 
 
 
-Choices coming soon...
+Working with choices
+^^^^^^^^^^^^^^^^^^^^
+
+The basics
+----------
+
+Choices are a useful thing for options
+
+For ex - you want to make commands like that user will be able to type some
+texts which you want.
+In this case choices are used
+
+Let's make a slashcommand with choices
+
+.. code-block:: python3
+    
+    from slash import Option, Choice
+
+    choices = [Choice(name="dog"),Choice(name="cat"),Choice(name="tiger")]
+    opts = [Option(name="animal", description="Choose an animal", choices=choices)]
+
+    @slash.command(name="animal", description="choose an animal", options=opts)
+    async def Animal(ctx, animal: str):
+       await ctx.reply(f"You chose {animal}")
