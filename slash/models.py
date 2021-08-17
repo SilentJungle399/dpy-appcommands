@@ -1,197 +1,208 @@
-
 from slash.enums import MessageFlags
-from typing import Dict, List
+from typing import Dict, List, Union
 import discord
 from discord import http
 from discord.ext import commands
 from .types import SlashClient
 import requests
 from discord import ui
+import asyncio
 
 class InteractionContext:
-	def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
-		self.bot: commands.Bot = bot
-		self.client: SlashClient = client
-		self.version: int = None
-		self.type: int = None
-		self.token: str = None
-		self.id: int = None
-		self.data: dict = None
-		self.application_id: int = None
-		self.member: discord.Member = None
-		self.channel: discord.TextChannel = None
-		self.guild: discord.Guild = None
+    def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
+        self.bot: commands.Bot = bot
+        self.client: SlashClient = client
+        self.version: int = None
+        self.type: int = None
+        self.token: str = None
+        self.id: int = None
+        self.data: dict = None
+        self.application_id: int = None
+        self.user: Union[discord.Member, discord.User] = None
+        self.channel: discord.TextChannel = None
+        self.guild: discord.Guild = None
 
-	async def from_dict(self, data: dict) -> 'InteractionContext':
-		self.version = data["version"]
-		self.type = data["type"]
-		self.token = data["token"]
-		self.id = int(data["id"])
-		self.data = data["data"]
-		self.application_id = int(data["application_id"])
+    async def from_interaction(self, interaction) -> 'InteractionContext':
+        self.version = interaction.version
+        self.type = interaction.type
+        self.token = interaction.token
+        self.id = interaction.id
+        self.data = interaction.data
+        self.application_id = interaction.application_id
+        self.user = interaction.user
+        self.guild = None
 
-		if "guild_id" in data:
-			self.guild = self.bot.get_guild(int(data["guild_id"]))
-			if not self.guild:
-				self.guild = await self.bot.fetch_guild(int(data["guild_id"]))
+        if isinstance(interaction.user, discord.Member):
+            self.guild = self.user.guild
+            
+        if interaction.channel_id is not None:
+            self.channel = self.guild.get_channel(interaction.channel_id)
+            if not self.channel:
+                self.channel = await self.guild.fetch_channel(interaction.channel_id)
 
-		if "channel_id" in data:
-			self.channel = self.guild.get_channel(int(data["channel_id"]))
-			if not self.channel:
-				self.channel = await self.guild.fetch_channel(int(data["channel_id"]))
+        
+        return self
 
-		if "member" in data:
-			self.member = self.guild.get_member(int(data["member"]["user"]["id"]))
-			if not self.member:
-				self.member = await self.guild.fetch_member(int(data["member"]["user"]["id"]))
+    async def reply(
+        self, 
+        content: str = None, *, 
+        tts: bool = False,
+        embed: discord.Embed = None,
+        allowed_mentions = None,
+        ephemeral: bool = False,
+        view: ui.View = None
+    ):
+        ret = {
+            "content": content,
+        }
 
-		return self
+        if ephemeral:
+            ret["flags"] = 64
 
-	async def reply(
-		self, 
-		content: str = None, *, 
-		tts: bool = False,
-		embed: discord.Embed = None,
-		allowed_mentions = None,
-		ephemeral: bool = False,
-		view: ui.View = None
-	):
-		ret = {
-			"content": content,
-		}
+        if embed:
+            ret["embeds"] = [embed.to_dict()]
 
-		if ephemeral:
-			ret["flags"] = 64
+        if view:
+            ret["components"] = view.to_components()
+            for i in view.children:
+                if i._provided_custom_id:
+                    self.client._views[i.custom_id] = [view, i]
 
-		if embed:
-			ret["embeds"] = [embed.to_dict()]
+        url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
 
-		if view:
-			ret["components"] = view.to_components()
-			for i in view.children:
-				if i._provided_custom_id:
-					self.client._views[i.custom_id] = [view, i]
+        json = {
+            "type": 4,
+            "data": ret
+        }
 
-		url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
+        resp = requests.post(url, json=json)
 
-		json = {
-			"type": 4,
-			"data": ret
-		}
+        self.client.log(f"Reply response - {resp.status_code}")
 
-		resp = requests.post(url, json=json)
+        return resp.text
 
-		self.client.log(f"Reply response - {resp.status_code}")
+    async def follow(
+        self, 
+        content: str = None, *, 
+        tts: bool = False,
+        embed: discord.Embed = None,
+        allowed_mentions = None,
+        ephemeral: bool = False,
+        view: ui.View = None
+    ):
+        ret = {
+            "content": content,
+        }
 
-		return resp.text
+        if ephemeral:
+            ret["flags"] = 64
 
-	async def follow(
-		self, 
-		content: str = None, *, 
-		tts: bool = False,
-		embed: discord.Embed = None,
-		allowed_mentions = None,
-		ephemeral: bool = False,
-		view: ui.View = None
-	):
-		ret = {
-			"content": content,
-		}
+        if embed:
+            ret["embeds"] = [embed.to_dict()]
 
-		if ephemeral:
-			ret["flags"] = 64
+        if view:
+            ret["components"] = view.to_components()
+            for i in view.children:
+                if i._provided_custom_id:
+                    self.client._views[i.custom_id] = [view, i]
 
-		if embed:
-			ret["embeds"] = [embed.to_dict()]
+        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}"
 
-		if view:
-			ret["components"] = view.to_components()
-			for i in view.children:
-				if i._provided_custom_id:
-					self.client._views[i.custom_id] = [view, i]
+        resp = requests.post(url, json = ret)
 
-		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}"
+        self.client.log(f"Follow msg response - {resp.status_code}")
 
-		resp = requests.post(url, json = ret)
+        return resp.text
 
-		self.client.log(f"Follow msg response - {resp.status_code}")
+    async def edit(
+        self, 
+        content: str = None, *, 
+        tts: bool = False,
+        embed: discord.Embed = None,
+        allowed_mentions = None,
+        ephemeral: bool = False,
+        view: ui.View = None
+    ):
+        ret = {
+            "content": content,
+        }
 
-		return resp.text
+        if ephemeral:
+            ret["flags"] = 64
 
-	async def edit(
-		self, 
-		content: str = None, *, 
-		tts: bool = False,
-		embed: discord.Embed = None,
-		allowed_mentions = None,
-		ephemeral: bool = False,
-		view: ui.View = None
-	):
-		ret = {
-			"content": content,
-		}
+        if embed:
+            ret["embeds"] = [embed.to_dict()]
 
-		if ephemeral:
-			ret["flags"] = 64
+        if view:
+            ret["components"] = view.to_components()
+            for i in view.children:
+                if i._provided_custom_id:
+                    self.client._views[i.custom_id] = [view, i]
 
-		if embed:
-			ret["embeds"] = [embed.to_dict()]
+        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
 
-		if view:
-			ret["components"] = view.to_components()
-			for i in view.children:
-				if i._provided_custom_id:
-					self.client._views[i.custom_id] = [view, i]
+        resp = requests.patch(url, json=ret)
 
-		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
+        self.client.log(f"Reply edit response - {resp.status_code}")
 
-		resp = requests.patch(url, json=ret)
+    async def delete(self):
+        url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
 
-		self.client.log(f"Reply edit response - {resp.status_code}")
+        resp = requests.delete(url)
 
-	async def delete(self):
-		url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
+        self.client.log(f"Delete reply response - {resp.status_code}")
 
-		resp = requests.delete(url)
-
-		self.client.log(f"Delete reply response - {resp.status_code}")
-
-		return resp.text
+        return resp.text
 
 class SlashCommand:
-	def __init__(self, client: SlashClient, name: str = None, options: List[Dict] = None, description: str = None):
-		self.client = client
-		self.name = name
-		self.options = options
-		self.description = description
+    def __init__(self, client: SlashClient, name: str, description: str, options: List[Dict] = None, callback = None):
+        if callback is not None:
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.callback = callback
+            self.name = name or callback.__name__
+        else:
+            self.name = name
+        self.client = client
+        self.options = options
+        self.description = description or ""
 
-	@classmethod
-	def from_dict(self, client: SlashClient, data: dict) -> 'SlashCommand':
-		self.version = int(data["version"])
-		self.application_id = int(data["application_id"])
-		self.id = int(data["id"])
-		self.name = data["name"]
-		self.default_permission = data["default_permission"]
-		self.type = int(data["type"])
-		if "description" in data:
-			description = data["description"]
-		else:
-			description = None
-		if "options" in data:
-			options = data["options"]
-		else:
-			options = []
+    @classmethod
+    def from_dict(self, client: SlashClient, data: dict) -> 'SlashCommand':
+        self.version = int(data["version"])
+        self.application_id = int(data["application_id"])
+        self.id = int(data["id"])
+        self.name = data["name"]
+        self.default_permission = data["default_permission"]
+        self.type = int(data["type"])
+        if "description" in data:
+            description = data["description"]
+        else:
+            description = None
+        if "options" in data:
+            options = data["options"]
+        else:
+            options = []
 
-		return self(client, name = data["name"], description = description, options = options)
+        return self(client, name = data["name"], description = description, options = options)
 
-	def ret_dict(self) -> dict:
-		ret = {
-			"name": self.name,
-			"description": self.description,
-			"options": self.options
-		}
+    def ret_dict(self) -> dict:
+        ret = {
+            "name": self.name,
+            "description": self.description,
+            "options": self.options
+        }
 
-		return ret
+        return ret
 
-	async def callback(self, ctx: InteractionContext):
-		pass
+    async def callback(self, ctx: InteractionContext):
+        raise NotImplementedError
+
+def command(*args,**kwargs):
+    def wrapper(func):
+        if not asyncio.iscoroutinefunction(func):
+            raise TypeError('Callback must be a coroutine.')
+        result = SlashCommand(*args, **kwargs, callback=func)
+        result.client.bot.loop.create_task(result.client.add_command(result))
+        return func
+    return wrapper
