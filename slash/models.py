@@ -470,7 +470,7 @@ class SubCommandGroup:
 class SlashCommand:
     """SlashCmd base class 
     
-    Prameters
+    Parameters
     ------------
     client: :class:`~slash.client.SlashClient`
        Your SlashClient instance, (required)
