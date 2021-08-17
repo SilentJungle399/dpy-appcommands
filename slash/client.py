@@ -20,7 +20,7 @@ class SlashClient:
     -----------
     bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
         Your dpy bot
-    logging: bool
+    logging: :class:`~bool`
         prints all the logs of this module, defaults to False
     
     Raises
@@ -46,9 +46,9 @@ class SlashClient:
 
         Parameters
         -----------
-        name: `str`
+        name: :class:`~str`
             name of the command, defaults to function name, (required)
-        description: Optional[`str`]
+        description: Optional[:class:`~str`]
             description of the command, required
         options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
@@ -83,7 +83,7 @@ class SlashClient:
         
         Parameters
         -----------
-        message: `str`
+        message: :class:`~str`
             The message which is to be logged"""
         if self.logging:
             print(message)
@@ -123,7 +123,7 @@ class SlashClient:
         
         Parameters
         -----------
-        name: `str`
+        name: :class:`~str`
             the name from which command is to be found"""
         return self._listeners.get(name)
 
@@ -132,7 +132,7 @@ class SlashClient:
 
         Parameters
         -----------
-        command: :class:`~slash.SlashCommand`
+        command: :class:`~slash.models.SlashCommand`
             The command to be added
         
         Raises
@@ -157,7 +157,7 @@ class SlashClient:
 
         Parameters
         -----------
-        command: :class:`~slash.SlashCommand`
+        command: :class:`~slash.models.SlashCommand`
             The command which is to be reloaded
 
         Raises
@@ -177,7 +177,7 @@ class SlashClient:
        
         Parameters
         ------------
-        name: `str`
+        name: :class:`~str`
             Name of the command"""
         slashcmds = await self.get_commands()
         checks = list(map(lambda a: a.name, slashcmds))
