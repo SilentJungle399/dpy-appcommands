@@ -29,7 +29,10 @@ class OptionType(IntEnum):
 
         Returns
         ---------
-        :class:`~slash.models.OptionType` or ``None``
+        :class:`.OptionType`
+            OptionType if found
+        :class:`~None`
+            None if not found
         """
 
         if issubclass(t, str):
