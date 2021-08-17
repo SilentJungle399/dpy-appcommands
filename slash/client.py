@@ -1,6 +1,7 @@
 import importlib
 from typing import Coroutine, List, Tuple, Union
 import discord
+
 Item = discord.ui.Item
 from .models import InteractionContext, SlashCommand, command as _cmd
 from .exceptions import *
@@ -9,6 +10,8 @@ from discord.enums import InteractionType
 from discord.ext import commands
 from discord.interactions import Interaction
 import sys
+import asyncio
+
 
 class SlashClient:
     """Slash Client handler class for bot
@@ -25,10 +28,13 @@ class SlashClient:
     ValueError
         The bot has already a slashclient registered with this module
     """
-    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot], logging: bool = False) -> None:
+    def __init__(self,
+                 bot: Union[commands.Bot, commands.AutoShardedBot],
+                 logging: bool = False):
         self.bot: commands.Bot = bot
         if hasattr(bot, "slashclient"):
-            raise ValueError("Bot has already a slashclient registered with this module")
+            raise ValueError(
+                "Bot has already a slashclient registered with this module")
         self.bot.slashclient = self
         self.logging: bool = logging
         self._listeners = {}
@@ -40,11 +46,11 @@ class SlashClient:
 
         Parameters
         -----------
-        name: str
-            name of the command, defaults to function name
-        description: str
+        name: `str`
+            name of the command, defaults to function name, (required)
+        description: Optional[`str`]
             description of the command, required
-        options: List[Dict]
+        options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
 
         Example
@@ -52,15 +58,24 @@ class SlashClient:
 
         .. code-block:: python3
 
+            from slash import SlashClient
+            
+            slash = SlashClient(bot, logging=True)
             @bot.slashclient.command(name="Hi", description="Hello!")
             async def some_func(ctx):
                 await ctx.reply("Hello!")
-
+                
+            # and 
+            
+            @slash.command(name="Hello", description="Hello")
+            async def hello(ctx):
+                await ctx.reply("Hello")
         """
         def decorator(func):
             wrapped = _cmd(self, *args, **kwargs)
-            wrapped(func)
-            return func
+            resp = wrapped(func)
+            return resp
+
         return decorator
 
     def log(self, message: str):
@@ -68,7 +83,7 @@ class SlashClient:
         
         Parameters
         -----------
-        message: str
+        message: `str`
             The message which is to be logged"""
         if self.logging:
             print(message)
@@ -76,8 +91,10 @@ class SlashClient:
     async def socket_resp(self, interaction):
         if interaction.type == InteractionType.application_command:
             if interaction.data['name'] in self._listeners:
-                context = await InteractionContext(self.bot, self).from_interaction(interaction)
-                await (self._listeners[context.data["name"]]).callback(context,**context.kwargs)
+                context = await InteractionContext(
+                    self.bot, self).from_interaction(interaction)
+                await (self._listeners[context.data["name"]]).callback(
+                    context, **context.kwargs)
 
         elif interaction.type == InteractionType.component:
             interactctx = interaction
@@ -92,12 +109,8 @@ class SlashClient:
         """Gives a list of slash command currently the bot have"""
         while not self.bot.is_ready():
             await self.bot.wait_until_ready()
-        data = await self.bot.http.request(
-            route = http.Route(
-                "GET",
-                f"/applications/{self.bot.user.id}/commands"
-            )
-        )
+        data = await self.bot.http.request(route=http.Route(
+            "GET", f"/applications/{self.bot.user.id}/commands"))
         ret = []
         for i in data:
             if i["type"] == 1:
@@ -107,7 +120,10 @@ class SlashClient:
 
     def get_command(self, name: str):
         """Gives a command registered in this module
-        name: str
+        
+        Parameters
+        -----------
+        name: `str`
             the name from which command is to be found"""
         return self._listeners.get(name)
 
@@ -122,22 +138,19 @@ class SlashClient:
         Raises
         -------
         .CommandExists
-            That slash cmd is already in bot"""
+            That slash cmd is already registered in bot with this module"""
         slashcmds = await self.get_commands()
         if command.name in self._listeners:
-            raise CommandExists(f"Command '{command.name}' has already been registered!")
+            raise CommandExists(
+                f"Command '{command.name}' has already been registered!")
         else:
-            checks = list(map(lambda a: a.name, slashcmds))
             if command in slashcmds:
                 await self.remove_command(command.name)
-            if command.name not in checks:
-                await self.bot.http.request(
-                    route = http.Route("POST", f"/applications/{self.bot.user.id}/commands"),
-                    json = command.ret_dict()
-                )
+            await self.bot.http.request(route=http.Route(
+                "POST", f"/applications/{self.bot.user.id}/commands"),
+                                        json=command.ret_dict())
             self._listeners[command.name] = command
             self.log(f"Slash command '{command.name}' registered!")
-
 
     def reload_command(self, command: SlashCommand):
         """Reloads a slash command
@@ -152,7 +165,8 @@ class SlashClient:
         .CommandNotRegistered
             That command is not registered"""
         if command.name not in self._listeners:
-            raise CommandNotRegistered(f"Command '{command.name}' has not been registered.")
+            raise CommandNotRegistered(
+                f"Command '{command.name}' has not been registered.")
         else:
             self._listeners.pop(command.name)
             self._listeners[command.name] = command
@@ -163,7 +177,7 @@ class SlashClient:
        
         Parameters
         ------------
-        name: str
+        name: `str`
             Name of the command"""
         slashcmds = await self.get_commands()
         checks = list(map(lambda a: a.name, slashcmds))
@@ -172,9 +186,8 @@ class SlashClient:
         else:
             id = slashcmds[checks.index(name)].id
 
-            await self.bot.http.request(
-                route = http.Route("DELETE", f"/applications/{self.bot.user.id}/commands/{id}")
-            )
+            await self.bot.http.request(route=http.Route(
+                "DELETE", f"/applications/{self.bot.user.id}/commands/{id}"))
 
     def load_extension(self, name: str):
         spec = importlib.util.find_spec(name)
