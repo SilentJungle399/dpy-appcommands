@@ -29,7 +29,7 @@ class OptionType(IntEnum):
 
         Returns
         ---------
-        :class:`.OptionType`
+        :class:`~slash.enums.OptionType`
             OptionType if found
         :class:`~None`
             None if not found
