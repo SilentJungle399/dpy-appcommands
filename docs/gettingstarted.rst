@@ -110,7 +110,7 @@ Custom Options
 
 
 Working with choices
-^^^^^^^^^^^^^^^^^^^^
+********************
 
 The basics
 ----------
@@ -122,6 +122,9 @@ texts which you want.
 In this case choices are used
 
 Let's make a slashcommand with choices
+
+Making a slashcommand with choices
+-----------------------------------
 
 .. code-block:: python3
     
