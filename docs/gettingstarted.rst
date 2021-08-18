@@ -5,7 +5,7 @@ Getting Started
 Where do we start?
 ******************
 
-Before we begin please read the :ref:`quickstart <slash:quickstart>` page first
+Before we begin please read the `quickstart <https://dpy-slash.readthedocs.io/en/latest/quickstart.html>`_ page first
 to know basics of this module
 
 Making a slash command.
