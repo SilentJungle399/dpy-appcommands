@@ -52,6 +52,8 @@ class SlashClient:
             description of the command, required
         options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
+        cls: :class:`~slash.models.SlashCommand`
+            The custom command class, must be a subclass of `~slash.models.SlashCommand`, (optional)
 
         Example
         ---------
@@ -70,6 +72,12 @@ class SlashClient:
             @slash.command(name="Hello", description="Hello")
             async def hello(ctx):
                 await ctx.reply("Hello")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already a SlashCommand
+
         """
         def decorator(func):
             wrapped = _cmd(self, *args, **kwargs)
