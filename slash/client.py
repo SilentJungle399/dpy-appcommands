@@ -53,7 +53,7 @@ class SlashClient:
         options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
         cls: :class:`~slash.models.SlashCommand`
-            The custom command class, must be a subclass of `~slash.models.SlashCommand`, (optional)
+            The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
 
         Example
         ---------

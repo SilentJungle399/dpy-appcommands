@@ -587,7 +587,7 @@ def command(cls: SlashCommand = None, *args, **kwargs):
     options: Optional[List[:class:`~slash.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
     cls: :class:`~slash.models.SlashCommand`
-        The custom command class, must be a subclass of `~slash.models.SlashCommand`, (optional)
+        The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
 
     Examples
     ----------
