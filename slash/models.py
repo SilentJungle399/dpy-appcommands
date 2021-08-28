@@ -573,7 +573,7 @@ class SlashCommand:
         raise NotImplementedError
 
 
-def command(*args, **kwargs):
+def command(cls: SlashCommand = None, *args, **kwargs):
     """The slash commands wrapper 
     
     Parameters
@@ -586,7 +586,9 @@ def command(*args, **kwargs):
         Description of the command, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
-        
+    cls: :class:`~slash.models.SlashCommand`
+        The custom command class, must be a subclass of `~slash.models.SlashCommand`, (optional)
+
     Examples
     ----------
     
@@ -598,12 +600,22 @@ def command(*args, **kwargs):
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
             await ctx.reply(f"Hi {user.mention}")
-    
+
+    Raises
+    --------
+    TypeError
+        The passed callback is not coroutine or it is already a SlashCommand
     """
+    if not cls:
+        cls = SlashCommand
+
     def wrapper(func):
         if not asyncio.iscoroutinefunction(func):
             raise TypeError('Callback must be a coroutine.')
-        result = SlashCommand(*args, **kwargs, callback=func)
+        if isinstance(func, SlashCommand):
+            raise TypeError('Callback is already a slashcommand.')
+
+        result = cls(*args, **kwargs, callback=func)
         result.client.bot.loop.create_task(result.client.add_command(result))
         return result
 
