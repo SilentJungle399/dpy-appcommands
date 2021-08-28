@@ -1,5 +1,5 @@
 class Error(Exception):
-	""" Comman base class """
+	"""SlashCommand base class error"""
 	pass
 
 class CommandExists(Error):
@@ -15,7 +15,7 @@ class CommandNotRegistered(Error):
 	pass
 
 class ExtensionNotFound(Error):
-	""" Fired when the ExtensionNotFound was not found """
+	""" Fired when the Extension was not found """
 	pass
 
 class LoadFailed(Error):
@@ -24,5 +24,5 @@ class LoadFailed(Error):
 
 
 class ExtensionNotLoaded(Error):
-	""" Fired when the ExtensionNotFound was not found """
+	""" Fired when the Extension couldn't be loaded """
 	pass
