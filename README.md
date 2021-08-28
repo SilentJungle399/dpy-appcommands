@@ -13,6 +13,7 @@ pip install -U git+https://github.com/SilentJungle399/slash-commands.git
 I'm not going to write a documentation on this thing, people who are curious can go through the code.
 
 For a headstart, I'll provide an example here
+If you want to view full documentation on it then [`click here`](https://dpy-slash.rtfd.io)
 
 ```py
 from slash import *
@@ -24,24 +25,14 @@ bot.slashclient = SlashClient(bot)
 class Blep(SlashCommand):
     def __init__(self):
         super().__init__(
-            bot.slashclient, 
-            name="blep", 
+            bot.slashclient,
+            name="blep",
             description = "Some blep description",
-
-            # A reference to discord docs for options
-            # https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-structure
-            options = [
-                { 
-                    "type": 3,
-                    "name": "pleb",
-                    "description": "some pleb description",
-                    "required": False
-                }
-            ]
+            callback = self.callback
         )
 
-    async def callback(self, ctx: InteractionContext):
-        await ctx.reply(f"why {ctx.data['options'][0]['value']}", ephemeral=True)
+    async def callback(self, ctx: InteractionContext, pleb: str = None):
+        await ctx.reply(f"why {pleb}", ephemeral=True)
 
 # or
 
@@ -51,7 +42,7 @@ async def test(ctx):
 
 # or
 
-@bot.slashclient.command(bot.slashclient, name="test2", description="test")
+@bot.slashclient.command(name="test2", description="test")
 async def test(ctx):
     await ctx.reply(f"tested {ctx.author}")
 
@@ -63,7 +54,9 @@ async def on_ready():
 bot.run("TOKEN")
 ```
 
+
 ### Screenshots
+
 ![image](https://user-images.githubusercontent.com/75272148/127775083-6722865b-b38a-4c1c-aeab-67792448224b.png)
 
 ![image](https://user-images.githubusercontent.com/75272148/127775088-8504cd9d-0b94-4e82-a683-e8acb6cc0f43.png)
