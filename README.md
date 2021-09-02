@@ -10,8 +10,6 @@ pip install -U git+https://github.com/SilentJungle399/slash-commands.git
 
 ### Usage
 
-I'm not going to write a documentation on this thing, people who are curious can go through the code.
-
 For a headstart, I'll provide an example here
 If you want to view full documentation on it then [`click here`](https://dpy-slash.rtfd.io)
 

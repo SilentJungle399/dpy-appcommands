@@ -108,6 +108,69 @@ Custom Options
         await ctx.reply('your favourite number is ' + str(number))
 
 
+Main point
+-----------
+
+A sample is given here 
+
+.. code-block:: python3
+
+    for slash import Option, Choice, OptionType
+
+    @slash.command(
+        name = "embed",
+        description = "creates an Embed",
+        options = [
+            Option(
+                name="title",
+                description="Title of the embed",
+                required=True
+            ),
+            Option(
+                name="description",
+                description="description of the embed",
+                required=True
+            ),
+            Option(
+                name="footer",
+                description="footer of the embed",
+                required=False
+            ),
+            Option(
+                name="timestamp",
+                description="whether to display timestamp on embed or not.",
+                required=False,
+                type=OptionType.BOOLEAN
+            )
+        ]
+    )
+    async def embed(ctx, title: str, description: str, footer: str = "", timestamp: bool = False):
+        embed = discord.Embed(title, description)
+        if footer:
+            embed.set_footer(footer)
+
+        if str(timestamp).lower() == "true":
+            embed.timestamp = datetime.datetime.now()
+
+        await ctx.reply(embed=embed)
+            
+If you are making a command as made in above then your hardwork is waste
+as it is same as ↓
+
+.. code-block:: python3
+
+    for slash import Option, Choice, OptionType
+
+    @slash.command(name="embed", description = "creates an Embed")
+    async def embed(ctx, title: str, description: str, footer: str = "", timestamp: bool = False):
+        embed = discord.Embed(title, description)
+        if footer:
+            embed.set_footer(footer)
+
+        if str(timestamp).lower() == "true":
+            embed.timestamp = datetime.datetime.now()
+
+        await ctx.reply(embed=embed)
 
 Working with choices
 ********************
@@ -136,3 +199,4 @@ Making a slashcommand with choices
     @slash.command(name="animal", description="choose an animal", options=opts)
     async def Animal(ctx, animal: str):
        await ctx.reply(f"You chose {animal}")
+
