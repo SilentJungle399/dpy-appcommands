@@ -1,4 +1,5 @@
 from typing import List, Union, Optional
+from aiohttp.client import ClientSession
 import discord
 from discord.ext import commands
 from .types import SlashClient
@@ -102,6 +103,7 @@ class InteractionContext:
     def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
         self.bot: commands.Bot = bot
         self.client: SlashClient = client
+        self.__session: ClientSession = self.bot.http._HTTPClient__session
         self.version: int = None
         self.type: int = None
         self.token: str = None
@@ -170,11 +172,10 @@ class InteractionContext:
 
         json = {"type": 4, "data": ret}
 
-        resp = requests.post(url, json=json)
+        async with self.__session.request('POST', url, json = json) as response:
+            self.client.log(f"Reply response - {response.status}")
 
-        self.client.log(f"Reply response - {resp.status_code}")
-
-        return resp.text
+            return response.text
 
     async def follow(self,
                      content: str = None,
@@ -184,6 +185,7 @@ class InteractionContext:
                      allowed_mentions=None,
                      ephemeral: bool = False,
                      view: ui.View = None):
+        """Sends a follow-up message."""
         ret = {
             "content": content,
         }
@@ -202,11 +204,10 @@ class InteractionContext:
 
         url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}"
 
-        resp = requests.post(url, json=ret)
+        async with self.__session.request('POST', url, json = ret) as response:
+            self.client.log(f"Follow msg response - {response.status}")
 
-        self.client.log(f"Follow msg response - {resp.status_code}")
-
-        return resp.text
+            return response.text
 
     async def edit(self,
                    content: str = None,
@@ -214,15 +215,11 @@ class InteractionContext:
                    tts: bool = False,
                    embed: discord.Embed = None,
                    allowed_mentions=None,
-                   ephemeral: bool = False,
                    view: ui.View = None):
-        """edit he responded msg"""
+        """edit the responded msg"""
         ret = {
             "content": content,
         }
-
-        if ephemeral:
-            ret["flags"] = 64
 
         if embed:
             ret["embeds"] = [embed.to_dict()]
@@ -235,19 +232,29 @@ class InteractionContext:
 
         url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
 
-        resp = requests.patch(url, json=ret)
-
-        self.client.log(f"Reply edit response - {resp.status_code}")
+        async with self.__session.request('PATCH', url, json = ret) as response:
+            self.client.log(f"Reply edit response - {response.status}")
 
     async def delete(self):
         """Delete the responded msg"""
         url = f"https://discord.com/api/v9/webhooks/{self.application_id}/{self.token}/messages/@original"
 
-        resp = requests.delete(url)
+        async with self.__session.request('DELETE', url) as response:
+            self.client.log(f"Delete reply response - {response.status}")
 
-        self.client.log(f"Delete reply response - {resp.status_code}")
+            return response.text
 
-        return resp.text
+    async def defer(self, ephemeral: bool = False):
+        """Defers the interaction so discord knows bot has recieved it, this is considered a reply so you must edit it later."""
+        url = f"https://discord.com/api/v9/interactions/{self.id}/{self.token}/callback"
+        ret = {"type": 5}
+        if ephemeral:
+            ret["data"] = {"flags": 64}
+
+        async with self.__session.request('POST', url, json=ret) as response:
+            self.client.log(f"Deferred interaction - {response.status}")
+
+            return response.text
 
 class InteractionData:
     def __init__(self, type: int, name: str, _id: int, options: Optional[List['Option']] = None) -> None:
