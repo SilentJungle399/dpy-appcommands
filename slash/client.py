@@ -53,7 +53,8 @@ class SlashClient:
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
     @property
-    def commands(self):
+    def commands(self) -> Dict[int, Dict]:
+        """Returns all the command listeners added to the instance."""
         return self.__commands
 
     def command(self, *args, **kwargs):
@@ -254,6 +255,19 @@ class SlashClient:
             self.__commands.pop(_id)
 
     def load_extension(self, name: str):
+        """Load a command from an external file.
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            Name of the file.
+            eg: `client.load_extension('commands.ping')` loads command from `commands/ping.py`
+
+        Raises
+        -------
+        .LoadFailed
+            When extension could not be loaded or does not have a `setup()` method.
+        """
         spec = importlib.util.find_spec(name)
         lib = importlib.util.module_from_spec(spec)
 
@@ -274,6 +288,19 @@ class SlashClient:
             raise e
 
     def reload_extension(self, name: str):
+        """Reload a command from an external file.
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            Name of the file.
+            eg: `client.reload_extension('commands.ping')` reloads command from `commands/ping.py`
+
+        Raises
+        -------
+        .LoadFailed
+            When extension could not be reloaded or does not have a `setup()` method.
+        """
         spec = importlib.util.find_spec(name)
         lib = importlib.util.module_from_spec(spec)
 
