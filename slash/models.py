@@ -1,14 +1,19 @@
-from .enums import MessageFlags
-from typing import Dict, List, Union, Optional
+import typing
 import discord
-from discord import http
-from discord.ext import commands
+import asyncio
+import inspect
+import requests
+import functools
+
+from .enums import MessageFlags
 from .types import SlashClient
 from .enums import OptionType
-import requests
+
 from discord import ui
-import asyncio
-import inspect, functools, typing
+from discord import http
+from discord.ext import commands
+from typing import Dict, List, Union, Optional
+
 
 __all__ = ("InteractionContext", "Option", "SlashCommand", "command", "Choice")
 
@@ -573,7 +578,10 @@ class SlashCommand:
         raise NotImplementedError
 
 
-def command(cls: SlashCommand = None, *args, **kwargs):
+
+MISSING = discord.utils.MISSING
+
+def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
     """The slash commands wrapper 
     
     Parameters
@@ -606,7 +614,7 @@ def command(cls: SlashCommand = None, *args, **kwargs):
     TypeError
         The passed callback is not coroutine or it is already a SlashCommand
     """
-    if not cls:
+    if cls is MISSING:
         cls = SlashCommand
 
     def wrapper(func):
@@ -615,7 +623,7 @@ def command(cls: SlashCommand = None, *args, **kwargs):
         if isinstance(func, SlashCommand):
             raise TypeError('Callback is already a slashcommand.')
 
-        result = cls(*args, **kwargs, callback=func)
+        result = cls(client,*args,**kwargs, callback=func)
         result.client.bot.loop.create_task(result.client.add_command(result))
         return result
 
