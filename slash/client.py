@@ -1,16 +1,17 @@
-import importlib
-from typing import Coroutine, List, Tuple, Union
+import sys
+import asyncio
 import discord
+import importlib
 
-Item = discord.ui.Item
 from .models import InteractionContext, SlashCommand, command as _cmd
 from .exceptions import *
 from discord import http, ui
+
 from discord.enums import InteractionType
 from discord.ext import commands
 from discord.interactions import Interaction
-import sys
-import asyncio
+from typing import Coroutine, List, Tuple, Union
+
 
 
 class SlashClient:
@@ -41,7 +42,7 @@ class SlashClient:
         self._views: Dict[str, Tuple[ui.View, Item]] = {}
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
-    def command(self, *args, **kwargs):
+    def command(self, *args, cls=discord.utils.MISSING, **kwargs):
         """Adds a command to bot
 
         Parameters
@@ -80,7 +81,7 @@ class SlashClient:
 
         """
         def decorator(func):
-            wrapped = _cmd(self, *args, **kwargs)
+            wrapped = _cmd(self, *args, cls=cls, **kwargs)
             resp = wrapped(func)
             return resp
 
