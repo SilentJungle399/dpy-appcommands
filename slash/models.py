@@ -108,7 +108,7 @@ class InteractionContext:
         self.type: int = None
         self.token: str = None
         self.id: int = None
-        self.data: dict = None
+        self.data: InteractionData = None
         self.application_id: int = None
         self.user: Union[discord.Member, discord.User] = None
         self.channel: discord.TextChannel = None
@@ -120,13 +120,13 @@ class InteractionContext:
         self.type = interaction.type
         self.token = interaction.token
         self.id = interaction.id
-        self.data = interaction.data
-        cmd = self.bot.slashclient._listeners.get(self.data.get("name"), None)
-        if cmd is not None and "options" in self.data:
+        self.data = InteractionData.from_dict(interaction.data)
+        cmd = self.bot.slashclient.commands.get(self.data.id, None)['command']
+        if cmd is not None and len(self.data.options) > 0:
             for k, v in cmd.params.items():
-                for opt in self.data.get("options"):
-                    if k == opt.get("name", ""):
-                        self.kwargs[k] = opt.get("value", "")
+                for opt in self.data.options:
+                    if k == opt.name:
+                        self.kwargs[k] = opt.value
         self.application_id = interaction.application_id
         self.user = interaction.user
         self.guild = None
@@ -251,6 +251,27 @@ class InteractionContext:
 
         return resp.text
 
+class InteractionData:
+    def __init__(self, type: int, name: str, _id: int, options: Optional[List['Option']] = None) -> None:
+        self.type = type
+        self.name = name
+        self.id = int(_id)
+        self.options = options
+
+    def __repr__(self):
+        return f"<InteractionData type={self.type} id={self.id} name={self.name} options={self.options}>"
+
+    def __str__(self):
+        return self.__repr__()
+
+    @classmethod
+    def from_dict(cls, d: dict) -> 'InteractionData':
+        options = []
+        if d.get('options'):
+            for i in d.get('options'):
+                options.append(Option.from_dict(i))
+
+        return cls(d['type'], d['name'], d['id'], options)
 
 class Choice:
     """Choice for the option value 
@@ -293,6 +314,7 @@ class Option:
                  description: Optional[str] = "No description.",
                  type: Optional[int] = 3,
                  required: Optional[bool] = True,
+                 value: str = None,
                  choices: Optional[List[Choice]] = []):
         if type not in (3, 4, 5, 6, 7, 8, 9, 10):
             raise ValueError(
@@ -302,6 +324,7 @@ class Option:
         self.description = description
         self.type = type
         self.choices = choices
+        self.value = value
         self.required = required
 
     def to_dict(self):
@@ -310,25 +333,26 @@ class Option:
             "description": self.description,
             "type": self.type,
             "choices": list(c.to_dict() for c in self.choices),
-            "required": self.required
+            "required": self.required,
+            "value": self.value
         }
         return ret
 
     @classmethod
     def from_dict(cls, data):
-        required = data.get("required")
+        required = True if data.get("required") else False
         name = data.get("name")
         description = data.get("description")
+        value = data.get("value")
         type = data.get("type")
         choices = []
         if data.get("choices"):
             for choice in choices:
                 choices.append(Choice(**choice))
-        return cls(name, description, type, required, choices)
+        return cls(name, description, type, required, value, choices)
 
     def __repr__(self):
-        return "<Option name={0.name} description={1} type={2.type} required={3} choices={0.choices}>".format(
-            self, self.description, self, self.required)
+        return f"<Option name={self.name} description={self.description} type={self.type} required={3} value={self.value} choices={self.choices}>"
 
 
 class SubCommand:
@@ -344,7 +368,6 @@ class SubCommand:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
-            callback.__slash_command__ = self
             self.callback = callback
             unwrap = unwrap_function(callback)
             try:
@@ -407,7 +430,6 @@ class SubCommandGroup:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
-            callback.__slash_command__ = self
             self.callback = callback
             unwrap = unwrap_function(callback)
             try:
@@ -494,22 +516,29 @@ class SlashCommand:
                  client: SlashClient,
                  name: str = None,
                  description: Optional[str] = "No description.",
+				 guild: Optional[int] = None,
                  options: Optional[List[Option]] = [],
                  callback=None,
                  subcommands: Optional[List[Union[SubCommandGroup,
                                                   SubCommand]]] = []):
         self.options = options
-        if callback is not None:
+        self.client = client
+        self.description = description
+        self.guild = guild
+        if callback is not None or (hasattr(self, 'callback') and callable(self.callback)):
+
+            if not callback:
+                callback = self.callback
+
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
-            callback.__slash_command__ = self
-            self.callback = callback
             unwrap = unwrap_function(callback)
             try:
                 globalns = unwrap.__globals__
             except:
                 globalns = {}
+
             self.params = get_signature_parameters(callback, globalns)
             if not options:
                 self.options = generate_options(self.callback, description)
@@ -517,13 +546,10 @@ class SlashCommand:
             if not name:
                 raise ValueError("You must specify name when callback is None")
             self.name = name
-        self.client = client
-        self.description = description or ""
         self.options.extend(subcommands)
 
     def __repr__(self):
-        return "<SlashCommmand name={0} description={1.description}>".format(
-            self.name, self)
+        return f"<SlashCommmand name='{self.name}' description='{self.description}'>"
 
     def __str__(self):
         return self.__repr__()
