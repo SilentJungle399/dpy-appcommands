@@ -1,8 +1,6 @@
 import importlib
-from logging import log
-from typing import Coroutine, List, Optional, Tuple, Union, Dict
+from typing import List, Optional, Tuple, Union, Dict
 import discord
-from discord import interactions
 
 Item = discord.ui.Item
 from .models import InteractionContext, SlashCommand, command as _cmd
@@ -10,9 +8,7 @@ from .exceptions import *
 from discord import http, ui
 from discord.enums import InteractionType
 from discord.ext import commands
-from discord.interactions import Interaction
 import sys
-import asyncio
 
 class Bot(commands.Bot):
     # Remove comments and add docs

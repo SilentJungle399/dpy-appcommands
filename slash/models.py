@@ -1,7 +1,5 @@
-from .enums import MessageFlags
-from typing import Dict, List, Union, Optional
+from typing import List, Union, Optional
 import discord
-from discord import http
 from discord.ext import commands
 from .types import SlashClient
 from .enums import OptionType
