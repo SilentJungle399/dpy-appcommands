@@ -275,7 +275,7 @@ class SlashClient:
         try:
             self.bot.loop.create_task(self.add_command(setup(self.bot)))
         except Exception as e:
-            print(e)
+            raise e
 
     def reload_extension(self, name: str):
         spec = importlib.util.find_spec(name)
@@ -295,4 +295,4 @@ class SlashClient:
         try:
             self.reload_command(setup(self.bot))
         except Exception as e:
-            print(e)
+            raise e
