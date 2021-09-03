@@ -19,12 +19,39 @@ slash.client Module
 .. autoclass:: SlashClient
     :members:
 
+slash.models Module
+----------------------------------
+
+.. currentmodule:: slash.models
+
+.. autoclass:: InteractionContext
+    :members:
+
+.. autoclass:: Choice
+    :members:
+
+.. autoclass:: Option
+    :members:
+
+.. autoclass:: SlashCommand
+    :members:
+
+.. autofunction:: command
+
 slash.enums Module
 ----------------------------------
 
 .. currentmodule:: slash.enums
 
 .. autoclass:: OptionType
+    :members:
+
+slash.types Module
+---------------------------------
+
+.. currentmodule:: slash.types
+
+.. autoclass:: StoredCommand
     :members:
 
 slash.exceptions Module
@@ -52,22 +79,3 @@ slash.exceptions Module
 
 .. autoclass:: ExtensionNotLoaded
     :members:
-
-slash.models Module
-----------------------------------
-
-.. currentmodule:: slash.models
-
-.. autoclass:: InteractionContext
-    :members:
-
-.. autoclass:: Choice
-    :members:
-
-.. autoclass:: Option
-    :members:
-
-.. autoclass:: SlashCommand
-    :members:
-
-.. autofunction:: command
