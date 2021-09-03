@@ -1,10 +1,13 @@
-from types import FunctionType
-from .enums import MessageFlags
-from typing import Coroutine, Dict, List, Optional, Tuple
-from discord.ext import commands
 import discord
+
+from .enums import MessageFlags
+
 from discord import ui
+from types import FunctionType
+from discord.ext import commands
 from discord.ui.item import Item
+from typing import Coroutine, Dict, List, Optional, Tuple
+
 
 class InteractionContext:
 	bot: commands.Bot
