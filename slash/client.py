@@ -37,7 +37,7 @@ class Bot(commands.Bot):
         super().__init__(**options)
         SlashClient(self, logging = True if options.get("slashlog") else False)
 
-    def slash(self, *args, **kwargs):
+    def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~slash.client.SlashClient.command`
 
@@ -65,6 +65,11 @@ class Bot(commands.Bot):
         --------
         TypeError
            The passed callback is not coroutine or it is already a SlashCommand
+
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
         """
         return self.slashclient.command(*args, **kwargs)
 
@@ -92,7 +97,7 @@ class AutoShardedBot(commands.AutoShardedBot):
         super().__init__(**options)
         self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
 
-    def slash(self, *args, **kwargs):
+    def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
         same as :func:`~slash.client.SlashClient.command`
 
@@ -120,6 +125,11 @@ class AutoShardedBot(commands.AutoShardedBot):
         --------
         TypeError
            The passed callback is not coroutine or it is already a SlashCommand
+
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
         """
         return self.slashclient.command(*args, **kwargs)
 
@@ -154,12 +164,16 @@ class SlashClient:
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
     @property
-    def commands(self) -> Dict[int, Dict]:
-        """Returns all the command listeners added to the instance."""
+    def commands(self) -> Dict[int, Dict[str, SlashCommand]]:
+        """Returns all the command listeners added to the instance.
+
+        Returns
+        ---------
+        Dict[:class:`~int`, Dict[:class:`~str`, :class:`~slash.models.SlashCommand`]]
+          The json of commands."""
         return self.__commands
 
-    def command(self, *args, cls=discord.utils.MISSING, **kwargs):
-
+    def command(self, *args, cls=discord.utils.MISSING, **kwargs) -> SlashCommand:
         """Adds a command to bot
 
         Parameters
@@ -196,6 +210,10 @@ class SlashClient:
         TypeError
            The passed callback is not coroutine or it is already a SlashCommand
 
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
         """
         def decorator(func):
             wrapped = _cmd(self, *args, cls=cls, **kwargs)
@@ -221,8 +239,7 @@ class SlashClient:
                 context = await InteractionContext(
                     self.bot, self).from_interaction(interaction)
 
-                await (command['command']).callback(
-                    context, **context.kwargs)
+                await (command['command']).callback(**context.kwargs)
 
         elif interaction.type == InteractionType.component:
             interactctx = interaction
