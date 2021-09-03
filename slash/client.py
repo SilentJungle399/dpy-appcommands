@@ -11,18 +11,116 @@ from discord.ext import commands
 import sys
 
 class Bot(commands.Bot):
-    # Remove comments and add docs
+    """The Bot
+    This is fully same as :class:~discord.ext.commands.Bot
+    
+    Parameters
+    ------------
+    slashlog: :class:`~bool`
+        Whether to log slashactions, defaults to False
 
-    # - inherits commands.Bot
-    # - one extra attribute, slashclient, now inbuilt instead of being init by user previously
-    def __init__(self, command_prefix, help_command = None, description = None, **options):
-        super().__init__(command_prefix, help_command=help_command, description=description, **options)
+    Example
+    ---------
 
+    .. code-block:: python3
+
+        import slash
+
+        bot = slash.Bot(command_prefix="$", slashlog=True)
+
+    """
+    def __init__(self, **options):
+        """Constructor"""
+        super().__init__(**options)
+        SlashClient(self, logging = True if options.get("slashlog") else False)
+
+    def slash(self, *args, **kwargs):
+        """Adds a command to bot
+        same as :func:~slash.client.SlashClient.command
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        options: Optional[List[:class:`~slash.models.Option`]]
+            the options for command, can be empty
+        cls: :class:`~slash.models.SlashCommand`
+            The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.slash(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.reply("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already a SlashCommand
+        """
+        return self.slashclient.command(*args, **kwargs)
+
+class AutoShardedBot(commands.AutoShardedBot):
+    """The AutoShardedBot class
+    This is fully same as :class:~discord.ext.commands.AutoShardedBot
+    
+    Parameters
+    ------------
+    slashlog: :class:`~bool`
+        Whether to log slashactions, defaults to False
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        import slash
+
+        bot = slash.AutoShardedBot(command_prefix="$", slashlog=True)
+
+    """
+    def __init__(self, **options):
+        """Constructor"""
+        super().__init__(**options)
         self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
 
-    # just a shorthand
     def slash(self, *args, **kwargs):
-        self.slashclient.command(*args, **kwargs)
+        """Adds a command to bot
+        same as :func:~slash.client.SlashClient.command
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        options: Optional[List[:class:`~slash.models.Option`]]
+            the options for command, can be empty
+        cls: :class:`~slash.models.SlashCommand`
+            The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.slash(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.reply("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already a SlashCommand
+        """
+        return self.slashclient.command(*args, **kwargs)
+
+
 
 class SlashClient:
     """Slash Client handler class for bot
