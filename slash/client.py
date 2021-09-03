@@ -158,7 +158,7 @@ class SlashClient:
         """Returns all the command listeners added to the instance."""
         return self.__commands
 
-    def command(self, *args, **kwargs):
+    def command(self, *args, cls=discord.utils.MISSING, **kwargs):
 
         """Adds a command to bot
 
