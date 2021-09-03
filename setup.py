@@ -3,7 +3,9 @@ import re
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
 version = ''
+
 with open('slash/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
