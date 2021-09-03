@@ -1,3 +1,4 @@
+import discord
 import importlib
 
 from .exceptions import *
