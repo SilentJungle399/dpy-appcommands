@@ -1,4 +1,5 @@
 import discord
+import asyncio
 
 from .types import SlashClient
 from .enums import OptionType
