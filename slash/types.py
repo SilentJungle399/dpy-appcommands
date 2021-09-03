@@ -4,7 +4,6 @@ from .enums import MessageFlags
 
 from discord import ui
 from types import FunctionType
-from _typeshed import NoneType
 from discord.ext import commands
 from discord.ui.item import Item
 from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
