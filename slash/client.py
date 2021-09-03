@@ -167,7 +167,7 @@ class SlashClient:
 
         Returns
         ---------
-        Dict[:class:`~int`, Dict[:class:`~str`, :class:`~slash.models.SlashCommand`]]
+        Dict[:class:`~int`, :class:`~slash.types.StoredCommand`]
           The json of commands."""
         return self.__commands
 
