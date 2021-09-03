@@ -3,9 +3,9 @@ Since this is for personal use, it will not be published on pypi.
 
 ## Installation and Usage
 
-To install this module, run 
+To install this version, run 
 ```bash
-pip install -U git+https://github.com/SilentJungle399/slash-commands.git
+pip install -U git+https://github.com/SilentJungle399/slash-commands@v1
 ```
 
 ### Usage

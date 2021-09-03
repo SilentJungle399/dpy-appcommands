@@ -1,11 +1,14 @@
-from _typeshed import NoneType
-from types import FunctionType
-from .enums import MessageFlags
-from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
-from discord.ext import commands
 import discord
+
+from .enums import MessageFlags
+
 from discord import ui
+from types import FunctionType
+from _typeshed import NoneType
+from discord.ext import commands
 from discord.ui.item import Item
+from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
+
 
 class InteractionContext:
 	bot: commands.Bot
@@ -105,3 +108,4 @@ class Choice:
 class StoredCommand(TypedDict):
 	guild: Union[int, None]
 	command: SlashCommand
+

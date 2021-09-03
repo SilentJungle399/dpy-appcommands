@@ -1,7 +1,4 @@
-from typing import List, Union, Optional
-from aiohttp.client import ClientSession
 import discord
-from discord.ext import commands
 
 from .types import SlashClient
 from .enums import OptionType
@@ -9,6 +6,7 @@ from .enums import OptionType
 from discord import ui
 from discord import http
 from discord.ext import commands
+from aiohttp.client import ClientSession
 from typing import Dict, List, Union, Optional
 
 
@@ -535,7 +533,7 @@ class SlashCommand:
         self.guild = guild
         if callback is not None or (hasattr(self, 'callback') and callable(self.callback)):
 
-            if not callback:
+            if callback:
                 callback = self.callback
 
             if not asyncio.iscoroutinefunction(callback):
@@ -553,7 +551,7 @@ class SlashCommand:
         else:
             if not name:
                 raise ValueError("You must specify name when callback is None")
-            self.name = name
+            self.name = self.__class__.__name__
         self.options.extend(subcommands)
 
     def __repr__(self):

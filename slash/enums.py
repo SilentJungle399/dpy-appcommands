@@ -1,4 +1,6 @@
-import typing, discord
+import typing
+import discord
+
 from enum import IntEnum
 
 
