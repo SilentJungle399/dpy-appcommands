@@ -15,7 +15,7 @@ import sys
 
 class Bot(commands.Bot):
     """The Bot
-    This is fully same as :class:~discord.ext.commands.Bot
+    This is fully same as :class:`~discord.ext.commands.Bot`
     
     Parameters
     ------------
@@ -39,7 +39,7 @@ class Bot(commands.Bot):
 
     def slash(self, *args, **kwargs):
         """Adds a command to bot
-        same as :func:~slash.client.SlashClient.command
+        same as :func:`~slash.client.SlashClient.command`
 
         Parameters
         -----------
@@ -70,7 +70,7 @@ class Bot(commands.Bot):
 
 class AutoShardedBot(commands.AutoShardedBot):
     """The AutoShardedBot class
-    This is fully same as :class:~discord.ext.commands.AutoShardedBot
+    This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
     
     Parameters
     ------------
@@ -94,7 +94,7 @@ class AutoShardedBot(commands.AutoShardedBot):
 
     def slash(self, *args, **kwargs):
         """Adds a command to bot
-        same as :func:~slash.client.SlashClient.command
+        same as :func:`~slash.client.SlashClient.command`
 
         Parameters
         -----------
