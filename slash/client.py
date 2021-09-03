@@ -1,13 +1,16 @@
 import importlib
 from typing import List, Optional, Tuple, Union, Dict
-import discord
 
-Item = discord.ui.Item
+import discord
+import importlib
+
 from .models import InteractionContext, SlashCommand, command as _cmd
 from .exceptions import *
 from discord import http, ui
+
 from discord.enums import InteractionType
 from discord.ext import commands
+
 import sys
 
 class Bot(commands.Bot):
@@ -156,6 +159,7 @@ class SlashClient:
         return self.__commands
 
     def command(self, *args, **kwargs):
+
         """Adds a command to bot
 
         Parameters
@@ -194,7 +198,7 @@ class SlashClient:
 
         """
         def decorator(func):
-            wrapped = _cmd(self, *args, **kwargs)
+            wrapped = _cmd(self, *args, cls=cls, **kwargs)
             resp = wrapped(func)
             return resp
 
