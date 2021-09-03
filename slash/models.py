@@ -1,7 +1,4 @@
-from typing import List, Union, Optional
-from aiohttp.client import ClientSession
 import discord
-from discord.ext import commands
 
 from .types import SlashClient
 from .enums import OptionType
@@ -9,6 +6,7 @@ from .enums import OptionType
 from discord import ui
 from discord import http
 from discord.ext import commands
+from aiohttp.client import ClientSession
 from typing import Dict, List, Union, Optional
 
 
