@@ -250,7 +250,7 @@ class SlashClient:
 
         return ret
 
-    def get_commands(self) -> dict[str, SlashCommand]:
+    def get_commands(self) -> Dict[str, SlashCommand]:
         """Gets every command registered in the current running instance"""
         ret = {}
 
