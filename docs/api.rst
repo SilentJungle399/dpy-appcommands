@@ -10,6 +10,12 @@ slash.client Module
 
 .. currentmodule:: slash.client
 
+.. autoclass:: Bot
+    :members:
+
+.. autoclass:: AutoShardedBot
+    :members:
+
 .. autoclass:: SlashClient
     :members:
 
