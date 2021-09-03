@@ -35,7 +35,7 @@ class Bot(commands.Bot):
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        SlashClient(self, logging = True if options.get("slashlog") else False)
+        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
 
     def slash(self, *args, **kwargs):
         """Adds a command to bot
