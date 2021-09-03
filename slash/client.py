@@ -1,17 +1,15 @@
-import importlib
-from typing import List, Optional, Tuple, Union, Dict
-
+import sys
 import discord
 import importlib
 
-from .models import InteractionContext, SlashCommand, command as _cmd
 from .exceptions import *
+from .models import InteractionContext, SlashCommand, command as _cmd
+
 from discord import http, ui
-
-from discord.enums import InteractionType
 from discord.ext import commands
+from discord.enums import InteractionType
+from typing import List, Optional, Tuple, Union, Dict
 
-import sys
 
 class Bot(commands.Bot):
     """The Bot
