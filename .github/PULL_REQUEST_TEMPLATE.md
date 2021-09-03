@@ -1,7 +1,7 @@
 ## Summary
 <!--Extended Description-->
 
-## Chnages Made:-
+## Changes Made:-
 
 <!--If you done this things listed here then
   replace [ ] with [x]-->
