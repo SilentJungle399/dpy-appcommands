@@ -1,7 +1,7 @@
 import importlib
+from slash.types import StoredCommand
 from typing import List, Optional, Tuple, Union, Dict
 
-import discord
 import importlib
 
 from .models import InteractionContext, SlashCommand, command as _cmd
@@ -149,12 +149,12 @@ class SlashClient:
                 "Bot has already a slashclient registered with this module")
         self.bot.slashclient = self
         self.logging: bool = logging
-        self._views: Dict[str, Tuple[ui.View, Item]] = {}
+        self._views: Dict[str, Tuple[ui.View, ui.Item]] = {}
         self.__commands = {}
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
     @property
-    def commands(self) -> Dict[int, Dict]:
+    def commands(self) -> Dict[int, StoredCommand]:
         """Returns all the command listeners added to the instance."""
         return self.__commands
 
