@@ -6,7 +6,7 @@ from discord import ui
 from types import FunctionType
 from discord.ext import commands
 from discord.ui.item import Item
-from typing import Coroutine, Dict, List, Optional, Tuple
+from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
 
 
 class InteractionContext:
@@ -103,3 +103,8 @@ class Option:
 class Choice:
 	name: str
 	value: Optional[str]
+
+class StoredCommand(TypedDict):
+	guild: Union[int, None]
+	command: SlashCommand
+

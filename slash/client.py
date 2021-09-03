@@ -1,8 +1,7 @@
-import sys
-import discord
 import importlib
 
 from .exceptions import *
+from .types import StoredCommand
 from .models import InteractionContext, SlashCommand, command as _cmd
 
 from discord import http, ui
@@ -33,7 +32,7 @@ class Bot(commands.Bot):
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        SlashClient(self, logging = True if options.get("slashlog") else False)
+        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
 
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
@@ -157,12 +156,12 @@ class SlashClient:
                 "Bot has already a slashclient registered with this module")
         self.bot.slashclient = self
         self.logging: bool = logging
-        self._views: Dict[str, Tuple[ui.View, Item]] = {}
+        self._views: Dict[str, Tuple[ui.View, ui.Item]] = {}
         self.__commands = {}
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
     @property
-    def commands(self) -> Dict[int, Dict[str, SlashCommand]]:
+    def commands(self) -> Dict[int, StoredCommand]:
         """Returns all the command listeners added to the instance.
 
         Returns
