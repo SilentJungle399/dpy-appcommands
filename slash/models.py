@@ -1,5 +1,9 @@
+import copy
+import typing
 import discord
 import asyncio
+import inspect
+import functools
 
 from .types import SlashClient
 from .enums import OptionType
@@ -11,8 +15,39 @@ from aiohttp.client import ClientSession
 from typing import Dict, List, Union, Optional
 
 
-__all__ = ("InteractionContext", "Option", "SlashCommand", "command", "Choice")
+__all__ = (
+    "Choice",
+    "command",
+    "InteractionContext",
+    "InteractionData",
+    "Option",
+    "SlashCommand"
+)
 
+async def get_ctx_kw(ctx, params):
+    bot, cmd, kwargs = ctx.bot, ctx.command, {}
+    if cmd is not None and len(ctx.data.options) > 0:
+        for k, _ in params.items():
+            for opt in ctx.data.options:    
+                if k == opt.name:
+                    if opt.type == OptionType.USER:
+                        if ctx.guild:
+                            value = ctx.guild.get_member(opt.value) or await ctx.guild.fetch_member(opt.value)
+                        else:
+                            value = bot.get_user(opt.value) or await bot.fetch_user(opt.value)
+                    elif opt.type == OptionType.CHANNEL:
+                        if ctx.guild:
+                            value = ctx.guild.get_channel(opt.value) or await ctx.guild.fetch_channel(opt.value)
+                        else:
+                            value = bot.get_channel(opt.value) or await bot.fetch_channel(opt.value)
+                    elif opt.type == OptionType.ROLE:
+                        value = ctx.guild.get_role(opt.value)
+                    elif opt.type == OptionType.MENTIONABLE:
+                        value = discord.Object(opt.value)
+                    else:
+                        value = opt.value
+                    kwargs[k] = value
+    return kwargs
 
 def unwrap_function(function):
     partial = functools.partial
@@ -124,11 +159,11 @@ class InteractionContext:
         self.id = interaction.id
         self.data = InteractionData.from_dict(interaction.data)
         cmd = self.bot.slashclient.commands.get(self.data.id, None)['command']
-        if cmd is not None and len(self.data.options) > 0:
-            for k, v in cmd.params.items():
-                for opt in self.data.options:
-                    if k == opt.name:
-                        self.kwargs[k] = opt.value
+        self.command = cmd
+        params = copy.deepcopy(cmd.params)
+        if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
+            self.kwargs[str(params.pop(list(params.keys())[0]))] = cmd.cog
+        self.kwargs[str(params.pop(list(params.keys())[0]))] = self
         self.application_id = interaction.application_id
         self.user = interaction.user
         self.guild = None
@@ -143,6 +178,7 @@ class InteractionContext:
         elif interaction.channel_id is not None:
             self.channel = await self.user._get_channel()
 
+        self.kwargs = {**self.kwargs, **(await get_ctx_kw(self, params))}
         return self
 
     async def reply(self,
@@ -259,6 +295,21 @@ class InteractionContext:
             return response.text
 
 class InteractionData:
+    """The data given in `ctx.data`
+
+    **Attributes**
+
+    Attributes
+    ------------
+    type: :class:`~int`
+        Type of the command
+    name: :class:`~str`
+        Name of the command
+    id: :class:`~int`
+        Id of the command
+    options: List[:class:`~slash.models.Option`]
+        Options passed in command
+    """
     def __init__(self, type: int, name: str, _id: int, options: Optional[List['Option']] = None) -> None:
         self.type = type
         self.name = name
@@ -359,7 +410,7 @@ class Option:
         return cls(name, description, type, required, value, choices)
 
     def __repr__(self):
-        return f"<Option name={self.name} description={self.description} type={self.type} required={3} value={self.value} choices={self.choices}>"
+        return f"<Option name={self.name} description={self.description} type={self.type} required={self.required} value={self.value} choices={self.choices}>"
 
 
 class SubCommand:
@@ -525,21 +576,34 @@ class SlashCommand:
                  description: Optional[str] = "No description.",
 				 guild: Optional[int] = None,
                  options: Optional[List[Option]] = [],
-                 callback=None,
+                 callback = None,
                  subcommands: Optional[List[Union[SubCommandGroup,
                                                   SubCommand]]] = []):
         self.options = options
         self.client = client
         self.description = description
         self.guild = guild
-        if callback is not None or (hasattr(self, 'callback') and callable(self.callback)):
-
-            if callback:
-                callback = self.callback
-
+        self.cog = None
+        if callback:
             if not asyncio.iscoroutinefunction(callback):
                 raise TypeError('Callback must be a coroutine.')
             self.name = name or callback.__name__
+            unwrap = unwrap_function(callback)
+            try:
+                globalns = unwrap.__globals__
+            except:
+                globalns = {}
+
+            self.params = get_signature_parameters(callback, globalns)
+            if not options or options == []:
+                self.options = generate_options(callback, description)
+            self.callback = callback
+        elif (hasattr(self, 'callback') and callable(self.callback)):
+            if not callback:
+                callback = self.callback
+            if not asyncio.iscoroutinefunction(callback):
+                raise TypeError('Callback must be a coroutine.')
+            self.name = name or self.__class__.__name__
             unwrap = unwrap_function(callback)
             try:
                 globalns = unwrap.__globals__
@@ -552,7 +616,7 @@ class SlashCommand:
         else:
             if not name:
                 raise ValueError("You must specify name when callback is None")
-            self.name = self.__class__.__name__
+            self.name  = name
         self.options.extend(subcommands)
 
     def __repr__(self):
@@ -625,7 +689,7 @@ def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
     cls: :class:`~slash.models.SlashCommand`
         The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
 
-    Examples
+    Example
     ----------
     
     .. code-block:: python3
@@ -651,7 +715,7 @@ def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
         if isinstance(func, SlashCommand):
             raise TypeError('Callback is already a slashcommand.')
 
-        result = cls(client,*args,**kwargs, callback=func)
+        result = cls(client,*args, callback=func, **kwargs)
         result.client.bot.loop.create_task(result.client.add_command(result))
         return result
 

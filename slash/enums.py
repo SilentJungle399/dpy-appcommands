@@ -44,11 +44,11 @@ class OptionType(IntEnum):
         # The check for bool MUST be above the check for integers as booleans subclass integers
         if issubclass(t, int):
             return cls.INTEGER
-        if issubclass(t, discord.abc.User):
+        if issubclass(t, discord.User) or issubclass(t, discord.Member):
             return cls.USER
         if issubclass(t, discord.abc.GuildChannel):
             return cls.CHANNEL
-        if issubclass(t, discord.abc.Role):
+        if issubclass(t, discord.Role):
             return cls.ROLE
         if hasattr(typing, "_GenericAlias"):  # 3.7 onwards
             # Easier than imports

@@ -38,6 +38,15 @@ slash.models Module
 
 .. autofunction:: command
 
+slash.cog Module
+----------------------------------
+
+.. currentmodule:: slash.cog
+
+.. autofunction:: command
+
+.. autoclass:: SlashCog
+
 slash.enums Module
 ----------------------------------
 

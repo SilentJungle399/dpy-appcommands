@@ -33,7 +33,7 @@ setuptools.setup(
     description="A simple module to use for slash commands in discord.py.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=["docs"]),
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: MIT License",

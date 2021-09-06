@@ -367,7 +367,7 @@ class SlashClient:
             raise CommandDoesNotExists(f"Command '{name}' does not exist!")
         else:
             await self.bot.http.request(route=http.Route(
-                "DELETE", f"/applications/{self.bot.user.id}/commands/{id}"))
+                "DELETE", f"/applications/{self.bot.user.id}/commands/{_id}"))
 
             self.__commands.pop(_id)
 
