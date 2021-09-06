@@ -1,5 +1,6 @@
 import discord
 import importlib
+import sys
 
 from .exceptions import *
 from .types import StoredCommand
