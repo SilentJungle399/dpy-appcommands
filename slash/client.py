@@ -1,16 +1,135 @@
-import sys
-import asyncio
 import discord
 import importlib
 
-from .models import InteractionContext, SlashCommand, command as _cmd
 from .exceptions import *
-from discord import http, ui
+from .types import StoredCommand
+from .models import InteractionContext, SlashCommand, command as _cmd
 
-from discord.enums import InteractionType
+from discord import http, ui
 from discord.ext import commands
-from discord.interactions import Interaction
-from typing import Coroutine, List, Tuple, Union
+from discord.enums import InteractionType
+from typing import List, Optional, Tuple, Union, Dict
+
+
+class Bot(commands.Bot):
+    """The Bot
+    This is fully same as :class:`~discord.ext.commands.Bot`
+    
+    Parameters
+    ------------
+    slashlog: :class:`~bool`
+        Whether to log slashactions, defaults to False
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        import slash
+
+        bot = slash.Bot(command_prefix="$", slashlog=True)
+
+    """
+    def __init__(self, **options):
+        """Constructor"""
+        super().__init__(**options)
+        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
+
+    def slash(self, *args, **kwargs) -> SlashCommand:
+        """Adds a command to bot
+        same as :func:`~slash.client.SlashClient.command`
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        options: Optional[List[:class:`~slash.models.Option`]]
+            the options for command, can be empty
+        cls: :class:`~slash.models.SlashCommand`
+            The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.slash(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.reply("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already a SlashCommand
+
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
+        """
+        return self.slashclient.command(*args, **kwargs)
+
+class AutoShardedBot(commands.AutoShardedBot):
+    """The AutoShardedBot class
+    This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
+    
+    Parameters
+    ------------
+    slashlog: :class:`~bool`
+        Whether to log slashactions, defaults to False
+
+    Example
+    ---------
+
+    .. code-block:: python3
+
+        import slash
+
+        bot = slash.AutoShardedBot(command_prefix="$", slashlog=True)
+
+    """
+    def __init__(self, **options):
+        """Constructor"""
+        super().__init__(**options)
+        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
+
+    def slash(self, *args, **kwargs) -> SlashCommand:
+        """Adds a command to bot
+        same as :func:`~slash.client.SlashClient.command`
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            name of the command, defaults to function name, (required)
+        description: Optional[:class:`~str`]
+            description of the command, required
+        options: Optional[List[:class:`~slash.models.Option`]]
+            the options for command, can be empty
+        cls: :class:`~slash.models.SlashCommand`
+            The custom command class, must be a subclass of :class:`~slash.models.SlashCommand`, (optional)
+
+        Example
+        ---------
+
+        .. code-block:: python3
+
+            @bot.slash(name="Hi", description="Hello!")
+            async def some_func(ctx):
+                await ctx.reply("Hello!")
+
+        Raises
+        --------
+        TypeError
+           The passed callback is not coroutine or it is already a SlashCommand
+
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
+        """
+        return self.slashclient.command(*args, **kwargs)
 
 
 
@@ -38,11 +157,21 @@ class SlashClient:
                 "Bot has already a slashclient registered with this module")
         self.bot.slashclient = self
         self.logging: bool = logging
-        self._listeners = {}
-        self._views: Dict[str, Tuple[ui.View, Item]] = {}
+        self._views: Dict[str, Tuple[ui.View, ui.Item]] = {}
+        self.__commands = {}
         self.bot.add_listener(self.socket_resp, "on_interaction")
 
-    def command(self, *args, cls=discord.utils.MISSING, **kwargs):
+    @property
+    def commands(self) -> Dict[int, StoredCommand]:
+        """Returns all the command listeners added to the instance.
+
+        Returns
+        ---------
+        Dict[:class:`~int`, :class:`~slash.types.StoredCommand`]
+          The json of commands."""
+        return self.__commands
+
+    def command(self, *args, cls=discord.utils.MISSING, **kwargs) -> SlashCommand:
         """Adds a command to bot
 
         Parameters
@@ -79,6 +208,10 @@ class SlashClient:
         TypeError
            The passed callback is not coroutine or it is already a SlashCommand
 
+        Returns
+        --------
+        :class:`~slash.models.SlashCommand`
+            The slash command.
         """
         def decorator(func):
             wrapped = _cmd(self, *args, cls=cls, **kwargs)
@@ -99,11 +232,12 @@ class SlashClient:
 
     async def socket_resp(self, interaction):
         if interaction.type == InteractionType.application_command:
-            if interaction.data['name'] in self._listeners:
+            if int(interaction.data['id']) in self.__commands:
+                command = self.__commands[int(interaction.data['id'])]
                 context = await InteractionContext(
                     self.bot, self).from_interaction(interaction)
-                await (self._listeners[context.data["name"]]).callback(
-                    context, **context.kwargs)
+
+                await (command['command']).callback(**context.kwargs)
 
         elif interaction.type == InteractionType.component:
             interactctx = interaction
@@ -114,12 +248,16 @@ class SlashClient:
             item.refresh_state(interactctx)
             view._dispatch_item(item, interactctx)
 
-    async def get_commands(self) -> List[SlashCommand]:
-        """Gives a list of slash command currently the bot have"""
+    async def fetch_commands(self, guild_id: Optional[int]) -> List[SlashCommand]:
+        """fetch a list of slash command currently the bot have"""
         while not self.bot.is_ready():
             await self.bot.wait_until_ready()
+        add = ""
+        if guild_id:
+            add = f"/guilds/{guild_id}"
+
         data = await self.bot.http.request(route=http.Route(
-            "GET", f"/applications/{self.bot.user.id}/commands"))
+            "GET", f"/applications/{self.bot.user.id}{add}/commands"))
         ret = []
         for i in data:
             if i["type"] == 1:
@@ -127,14 +265,24 @@ class SlashClient:
 
         return ret
 
-    def get_command(self, name: str):
+    def get_commands(self) -> Dict[str, SlashCommand]:
+        """Gets every command registered in the current running instance"""
+        ret = {}
+
+        for i in self.__commands:
+            ret[self.__commands[i]['command'].name] = self.__commands[i]['command']
+
+        return ret
+
+    def get_command(self, name: str) -> SlashCommand:
         """Gives a command registered in this module
         
         Parameters
         -----------
         name: :class:`~str`
             the name from which command is to be found"""
-        return self._listeners.get(name)
+
+        return (self.get_commands()).get(name)
 
     async def add_command(self, command: SlashCommand):
         """Adds a slash command to bot
@@ -148,18 +296,34 @@ class SlashClient:
         -------
         .CommandExists
             That slash cmd is already registered in bot with this module"""
-        slashcmds = await self.get_commands()
-        if command.name in self._listeners:
+        slashcmds = await self.fetch_commands(None)
+
+        if command.guild:
+            slashcmds = await self.fetch_commands(command.guild)
+
+        if command.name in self.get_commands():
             raise CommandExists(
                 f"Command '{command.name}' has already been registered!")
         else:
             if command in slashcmds:
                 await self.remove_command(command.name)
-            await self.bot.http.request(route=http.Route(
-                "POST", f"/applications/{self.bot.user.id}/commands"),
+
+            add = ""
+            l_add = ""
+            if command.guild:
+                add = f"/guilds/{command.guild}"
+                l_add = f"Guild command for '{command.guild}'"
+
+            resp = await self.bot.http.request(route=http.Route(
+                "POST", f"/applications/{self.bot.user.id}{add}/commands"),
                                         json=command.ret_dict())
-            self._listeners[command.name] = command
-            self.log(f"Slash command '{command.name}' registered!")
+
+            self.log(f"Slash command '{command.name}' (ID: {resp['id']}) registered! {l_add}")
+
+            self.__commands[int(resp['id'])] = {
+                "guild": None if 'guild_id' not in resp else int(resp['guild_id']),
+                "command": command
+            }
 
     def reload_command(self, command: SlashCommand):
         """Reloads a slash command
@@ -173,32 +337,54 @@ class SlashClient:
         --------
         .CommandNotRegistered
             That command is not registered"""
-        if command.name not in self._listeners:
+        a = self.__commands
+        listenerlist = {self.__commands[i]['command'].name: i for i in self.__commands}
+        _id = listenerlist.get(command.name)
+
+        if not _id:
             raise CommandNotRegistered(
                 f"Command '{command.name}' has not been registered.")
         else:
-            self._listeners.pop(command.name)
-            self._listeners[command.name] = command
+            self.__commands.pop(_id)
+            self.__commands[_id] = {
+                "guild": command.guild,
+                "command": command
+            }
+
             self.log(f"Slash command '{command.name}' reloaded!")
 
     async def remove_command(self, name: str):
         """Removes command from the name given
-       
+
         Parameters
         ------------
         name: :class:`~str`
             Name of the command"""
-        slashcmds = await self.get_commands()
-        checks = list(map(lambda a: a.name, slashcmds))
-        if name not in checks:
+        listenerlist = {self.__commands[i]['command'].name: i for i in self.__commands}
+        _id = listenerlist.get(name)
+
+        if not _id:
             raise CommandDoesNotExists(f"Command '{name}' does not exist!")
         else:
-            id = slashcmds[checks.index(name)].id
-
             await self.bot.http.request(route=http.Route(
-                "DELETE", f"/applications/{self.bot.user.id}/commands/{id}"))
+                "DELETE", f"/applications/{self.bot.user.id}/commands/{_id}"))
+
+            self.__commands.pop(_id)
 
     def load_extension(self, name: str):
+        """Load a command from an external file.
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            Name of the file.
+            eg: `client.load_extension('commands.ping')` loads command from `commands/ping.py`
+
+        Raises
+        -------
+        .LoadFailed
+            When extension could not be loaded or does not have a `setup()` method.
+        """
         spec = importlib.util.find_spec(name)
         lib = importlib.util.module_from_spec(spec)
 
@@ -216,9 +402,22 @@ class SlashClient:
         try:
             self.bot.loop.create_task(self.add_command(setup(self.bot)))
         except Exception as e:
-            print(e)
+            raise e
 
     def reload_extension(self, name: str):
+        """Reload a command from an external file.
+
+        Parameters
+        -----------
+        name: :class:`~str`
+            Name of the file.
+            eg: `client.reload_extension('commands.ping')` reloads command from `commands/ping.py`
+
+        Raises
+        -------
+        .LoadFailed
+            When extension could not be reloaded or does not have a `setup()` method.
+        """
         spec = importlib.util.find_spec(name)
         lib = importlib.util.module_from_spec(spec)
 
@@ -236,4 +435,4 @@ class SlashClient:
         try:
             self.reload_command(setup(self.bot))
         except Exception as e:
-            print(e)
+            raise e

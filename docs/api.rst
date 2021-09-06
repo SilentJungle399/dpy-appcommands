@@ -10,8 +10,42 @@ slash.client Module
 
 .. currentmodule:: slash.client
 
+.. autoclass:: Bot
+    :members:
+
+.. autoclass:: AutoShardedBot
+    :members:
+
 .. autoclass:: SlashClient
     :members:
+
+slash.models Module
+----------------------------------
+
+.. currentmodule:: slash.models
+
+.. autoclass:: InteractionContext
+    :members:
+
+.. autoclass:: Choice
+    :members:
+
+.. autoclass:: Option
+    :members:
+
+.. autoclass:: SlashCommand
+    :members:
+
+.. autofunction:: command
+
+slash.cog Module
+----------------------------------
+
+.. currentmodule:: slash.cog
+
+.. autofunction:: command
+
+.. autoclass:: SlashCog
 
 slash.enums Module
 ----------------------------------
@@ -19,6 +53,14 @@ slash.enums Module
 .. currentmodule:: slash.enums
 
 .. autoclass:: OptionType
+    :members:
+
+slash.types Module
+---------------------------------
+
+.. currentmodule:: slash.types
+
+.. autoclass:: StoredCommand
     :members:
 
 slash.exceptions Module
@@ -46,22 +88,3 @@ slash.exceptions Module
 
 .. autoclass:: ExtensionNotLoaded
     :members:
-
-slash.models Module
-----------------------------------
-
-.. currentmodule:: slash.models
-
-.. autoclass:: InteractionContext
-    :members:
-
-.. autoclass:: Choice
-    :members:
-
-.. autoclass:: Option
-    :members:
-
-.. autoclass:: SlashCommand
-    :members:
-
-.. autofunction:: command

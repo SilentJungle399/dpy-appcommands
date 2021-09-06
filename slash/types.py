@@ -1,9 +1,13 @@
-from .enums import MessageFlags
-from typing import Coroutine, Dict, List, Tuple
-from discord.ext import commands
 import discord
+
+from .enums import MessageFlags
+
 from discord import ui
+from types import FunctionType
+from discord.ext import commands
 from discord.ui.item import Item
+from typing import Coroutine, Dict, List, Optional, Tuple, TypedDict, Union
+
 
 class InteractionContext:
 	bot: commands.Bot
@@ -58,9 +62,13 @@ class InteractionContext:
 		...
 
 class SlashCommand:
-	name: str
-	options: dict
 	client: 'SlashClient'
+	name: str
+	description: str
+	options: dict
+	guild: Optional[int]
+	options: Optional[List['Option']]
+	callback: Optional[FunctionType]
 
 	def from_dict(self, data: dict) -> 'SlashCommand':
 		...
@@ -84,3 +92,32 @@ class SlashClient:
 
 	def log(self, message: str):
 		...
+
+class Option:
+	name: str
+	description: Optional[str]
+	type: Optional[str]
+	required: Optional[bool]
+	choices: Optional[List['Choice']]
+
+class Choice:
+	name: str
+	value: Optional[str]
+
+class StoredCommand(TypedDict):
+	"""The stored command Type
+
+        Parameters
+        ------------
+        guild: Union[:class:`~int`, None]
+            The guild id of command, None if it is glob
+        command: :class:`~slash.models.SlashCommand`
+            The command itself
+
+        Returns
+        --------
+        :class:`~dict`
+            The json resp"""
+	guild: Union[int, None]
+	command: SlashCommand
+
