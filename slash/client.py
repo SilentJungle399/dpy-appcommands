@@ -46,6 +46,8 @@ class Bot(commands.Bot):
             name of the command, defaults to function name, (required)
         description: Optional[:class:`~str`]
             description of the command, required
+        guild: Optional[:class:`~str`]
+            id of the guild for which command is to be added, (optional)
         options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
         cls: :class:`~slash.models.SlashCommand`
@@ -106,6 +108,8 @@ class AutoShardedBot(commands.AutoShardedBot):
             name of the command, defaults to function name, (required)
         description: Optional[:class:`~str`]
             description of the command, required
+        guild: Optional[:class:`~str`]
+            id of the guild for which command is to be added, (optional)
         options: Optional[List[:class:`~slash.models.Option`]]
             the options for command, can be empty
         cls: :class:`~slash.models.SlashCommand`
@@ -249,7 +253,7 @@ class SlashClient:
             item.refresh_state(interactctx)
             view._dispatch_item(item, interactctx)
 
-    async def fetch_commands(self, guild_id: Optional[int]) -> List[SlashCommand]:
+    async def fetch_commands(self, guild_id: Optional[int] = None) -> List[SlashCommand]:
         """fetch a list of slash command currently the bot have
 
         Parameters
