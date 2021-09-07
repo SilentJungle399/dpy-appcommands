@@ -103,7 +103,7 @@ class SlashCog(Cog):
                     del slashcmds[elem]
     
                 if isinstance(value, CogSlashCommand):
-                    slashcmds[elem] = value
+                    slashcmds[elem] = (value, base)
         self.__slash_commands__ = tuple(cmd for cmd in slashcmds.values())
         return self
 
