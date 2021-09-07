@@ -31,6 +31,8 @@ def command(*args, cls=MISSING, **kwargs):
         Name of the command, (required)
     description: Optional[:class:`~str`]
         Description of the command, (optional)
+    guild: Optional[:class:`~str`]
+        Id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
     cls: :class:`~slash.models.SlashCommand`
