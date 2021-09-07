@@ -250,7 +250,13 @@ class SlashClient:
             view._dispatch_item(item, interactctx)
 
     async def fetch_commands(self, guild_id: Optional[int]) -> List[SlashCommand]:
-        """fetch a list of slash command currently the bot have"""
+        """fetch a list of slash command currently the bot have
+
+        Parameters
+        -------------
+        guild_id: Optional[:class:`~int`]
+            Should be given to fetch guild commands, (optional)
+        """
         while not self.bot.is_ready():
             await self.bot.wait_until_ready()
         add = ""
