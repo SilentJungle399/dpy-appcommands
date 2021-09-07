@@ -1,5 +1,4 @@
 # slash-commands
-Since this is for personal use, it will not be published on pypi.
 
 ## Installation and Usage
 
@@ -10,15 +9,15 @@ pip install -U git+https://github.com/SilentJungle399/slash-commands@v1
 
 ### Usage
 
-For a headstart, I'll provide an example here
-If you want to view full documentation on it then [`click here`](https://dpy-slash.rtfd.io)
+For a headstart, here's an example 
+but if you want to view full
+documentation on it then [`click here`](https://dpy-slash.rtfd.io)
 
 ```py
-from slash import *
+import slash
 from discord.ext import commands
 
-bot = commands.Bot(command_prefix=commands.when_mentioned_or('?'))
-bot.slashclient = SlashClient(bot)
+bot = slash.Bot(command_prefix=commands.when_mentioned_or('?'))
 
 class Blep(SlashCommand):
     def __init__(self):
@@ -34,7 +33,7 @@ class Blep(SlashCommand):
 
 # or
 
-@command(bot.slashclient, name="test", description="test")
+@bot.slash(name="test", description="test")
 async def test(ctx):
     await ctx.reply("tested")
 
