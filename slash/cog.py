@@ -110,11 +110,12 @@ class SlashCog(Cog):
     def _inject(self, bot):
         new_list = []
         for i, cmd in enumerate(self.__slash_commands__):
-            wrapped = _cmd(bot.slashclient, *cmd.args, cls=cmd._cls, **cmd.kwargs)
-            cmd = wrapped(cmd.callback)
-            cmd.cog = self.__class__
-            new_list.append(cmd)
-            setattr(self, cmd.name, cmd.callback)
+            for cmd, cog in data:
+                wrapped = _cmd(bot.slashclient, *cmd.args, cls=cmd._cls, **cmd.kwargs)
+                cmd = wrapped(cmd.callback)
+                cmd.cog = cog
+                new_list.append(cmd)
+                setattr(self, cmd.name, cmd.callback)
             
         self.__slash_commands__ = tuple(c for c in new_list)
         return super()._inject(bot)
