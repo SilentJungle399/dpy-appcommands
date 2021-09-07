@@ -23,7 +23,7 @@ MISSING = discord.utils.MISSING
 
 def command(*args, cls=MISSING, **kwargs):
     """Same as :func:`~slash.models.command` but doesn't
-    requires slashclient and is to be used in cogs only
+    requires appclient and is to be used in cogs only
 
     Parameters
     ------------
@@ -111,7 +111,7 @@ class SlashCog(Cog):
         new_list = []
         for i, cmd in enumerate(self.__slash_commands__):
             cmd, cog = data
-            wrapped = _cmd(bot.slashclient, *cmd.args, cls=cmd._cls, **cmd.kwargs)
+            wrapped = _cmd(bot.appclient, *cmd.args, cls=cmd._cls, **cmd.kwargs)
             cmd = wrapped(cmd.callback)
             cmd.cog = cog
             new_list.append(cmd)
@@ -121,7 +121,7 @@ class SlashCog(Cog):
         return super()._inject(bot)
         
     def _eject(self, bot):
-        slash, loop = bot.slashclient, bot.loop
+        slash, loop = bot.appclient, bot.loop
         for cmd in self.__slash_commands__:
             loop.create_task(slash.remove_command(cmd.name))
             

@@ -1,28 +1,29 @@
-# slash-commands
+# dpy-appcommands
 
 ## Installation and Usage
 
-To install this version, run 
+To install this version, run
+
 ```bash
-pip install -U git+https://github.com/SilentJungle399/slash-commands@v1
+pip install -U git+https://github.com/SilentJungle399/dpy-appcommands@v1
 ```
 
 ### Usage
 
-For a headstart, here's an example 
+For a headstart, here's an example
 but if you want to view full
 documentation on it then [`click here`](https://dpy-slash.rtfd.io)
 
 ```py
-import slash
+import appcommands
 from discord.ext import commands
 
-bot = slash.Bot(command_prefix=commands.when_mentioned_or('?'))
+bot = appcommands.Bot(command_prefix=commands.when_mentioned_or('?'))
 
 class Blep(SlashCommand):
     def __init__(self):
         super().__init__(
-            bot.slashclient,
+            bot.appclient,
             name="blep",
             description = "Some blep description",
             callback = self.callback
@@ -39,18 +40,17 @@ async def test(ctx):
 
 # or
 
-@bot.slashclient.command(name="test2", description="test")
+@bot.appclient.command(name="test2", description="test")
 async def test(ctx):
     await ctx.reply(f"tested {ctx.author}")
 
 @bot.event
 async def on_ready():
     print(f'Logged on as {bot.user} (ID: {bot.user.id})')
-    await bot.slashclient.add_command(Blep())
+    await bot.appclient.add_command(Blep())
 
 bot.run("TOKEN")
 ```
-
 
 ### Screenshots
 

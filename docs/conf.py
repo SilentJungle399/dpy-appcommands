@@ -19,9 +19,9 @@
 
 # -- Project information -----------------------------------------------------
 
-from slash import __version__
+from appcommands import __version__
 
-project = 'slash'
+project = 'appcommands'
 copyright = '2021, SilentJungle399'
 author = 'SilentJungle399'
 

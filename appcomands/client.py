@@ -15,11 +15,6 @@ from typing import List, Optional, Tuple, Union, Dict
 class Bot(commands.Bot):
     """The Bot
     This is fully same as :class:`~discord.ext.commands.Bot`
-    
-    Parameters
-    ------------
-    slashlog: :class:`~bool`
-        Whether to log slashactions, defaults to False
 
     Example
     ---------
@@ -28,17 +23,17 @@ class Bot(commands.Bot):
 
         import slash
 
-        bot = slash.Bot(command_prefix="$", slashlog=True)
+        bot = slash.Bot(command_prefix="$")
 
     """
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
+        self.appclient = AppClient(self)
 
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
-        same as :func:`~slash.client.SlashClient.command`
+        same as :func:`~slash.client.AppClient.command`
 
         Parameters
         -----------
@@ -69,19 +64,14 @@ class Bot(commands.Bot):
 
         Returns
         --------
-        :class:`~slash.models.SlashCommand`
+        :class:`~appcommands.models.SlashCommand`
             The slash command.
         """
-        return self.slashclient.command(*args, **kwargs)
+        return self.appclient.command(*args, **kwargs)
 
 class AutoShardedBot(commands.AutoShardedBot):
     """The AutoShardedBot class
     This is fully same as :class:`~discord.ext.commands.AutoShardedBot`
-    
-    Parameters
-    ------------
-    slashlog: :class:`~bool`
-        Whether to log slashactions, defaults to False
 
     Example
     ---------
@@ -90,17 +80,17 @@ class AutoShardedBot(commands.AutoShardedBot):
 
         import slash
 
-        bot = slash.AutoShardedBot(command_prefix="$", slashlog=True)
+        bot = slash.AutoShardedBot(command_prefix="$")
 
     """
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        self.slashclient = SlashClient(self, logging = True if options.get("slashlog") else False)
+        self.appclient = AppClient(self)
 
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
-        same as :func:`~slash.client.SlashClient.command`
+        same as :func:`~slash.client.AppClient.command`
 
         Parameters
         -----------
@@ -134,11 +124,10 @@ class AutoShardedBot(commands.AutoShardedBot):
         :class:`~slash.models.SlashCommand`
             The slash command.
         """
-        return self.slashclient.command(*args, **kwargs)
+        return self.appclient.command(*args, **kwargs)
 
 
-
-class SlashClient:
+class AppClient:
     """Slash Client handler class for bot
     
     Parameters
@@ -151,16 +140,16 @@ class SlashClient:
     Raises
     -------
     ValueError
-        The bot has already a slashclient registered with this module
+        The bot has already a appclient registered with this module
     """
     def __init__(self,
                  bot: Union[commands.Bot, commands.AutoShardedBot],
                  logging: bool = False):
         self.bot: commands.Bot = bot
-        if hasattr(bot, "slashclient"):
+        if hasattr(bot, "appclient"):
             raise ValueError(
-                "Bot has already a slashclient registered with this module")
-        self.bot.slashclient = self
+                "Bot has already a appclient registered with this module")
+        self.bot.appclient = self
         self.logging: bool = logging
         self._views: Dict[str, Tuple[ui.View, ui.Item]] = {}
         self.__commands = {}
@@ -195,10 +184,10 @@ class SlashClient:
 
         .. code-block:: python3
 
-            from slash import SlashClient
+            from slash import AppClient
             
-            slash = SlashClient(bot, logging=True)
-            @bot.slashclient.command(name="Hi", description="Hello!")
+            slash = AppClient(bot, logging=True)
+            @bot.appclient.command(name="Hi", description="Hello!")
             async def some_func(ctx):
                 await ctx.reply("Hello!")
                 
@@ -254,12 +243,12 @@ class SlashClient:
             view._dispatch_item(item, interactctx)
 
     async def fetch_commands(self, guild_id: Optional[int] = None) -> List[SlashCommand]:
-        """fetch a list of slash command currently the bot have
+        """fetch a list of slash command currently the bot has
 
         Parameters
         -------------
         guild_id: Optional[:class:`~int`]
-            Should be given to fetch guild commands, (optional)
+            Should be given to fetch guild commands. (optional)
         """
         while not self.bot.is_ready():
             await self.bot.wait_until_ready()

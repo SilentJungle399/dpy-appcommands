@@ -21,10 +21,10 @@ Initialising
 .. code-block:: python3
 
     from discord.ext import commands
-    from slash import Slashclient
+    from slash import AppClient
 
     bot = commands.Bot(command_prefix="$")
-    slash = SlashClient(bot)
+    slash = AppClient(bot)
 
 Then we will make a command
 

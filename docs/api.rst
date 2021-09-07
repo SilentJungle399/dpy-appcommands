@@ -1,14 +1,14 @@
-.. currentmodule:: slash
+.. currentmodule:: appcommands
 
 API Reference
 =============
 
 Modules
 
-slash.client Module
+appcommands.client Module
 ----------------------------------
 
-.. currentmodule:: slash.client
+.. currentmodule:: appcommands.client
 
 .. autoclass:: Bot
     :members:
@@ -16,13 +16,13 @@ slash.client Module
 .. autoclass:: AutoShardedBot
     :members:
 
-.. autoclass:: SlashClient
+.. autoclass:: AppClient
     :members:
 
-slash.models Module
+appcommands.models Module
 ----------------------------------
 
-.. currentmodule:: slash.models
+.. currentmodule:: appcommands.models
 
 .. autoclass:: InteractionContext
     :members:
@@ -33,40 +33,40 @@ slash.models Module
 .. autoclass:: Option
     :members:
 
-.. autoclass:: SlashCommand
+.. autoclass:: appcommandsCommand
     :members:
 
 .. autofunction:: command
 
-slash.cog Module
+appcommands.cog Module
 ----------------------------------
 
-.. currentmodule:: slash.cog
+.. currentmodule:: appcommands.cog
 
 .. autofunction:: command
 
-.. autoclass:: SlashCog
+.. autoclass:: appcommandsCog
 
-slash.enums Module
+appcommands.enums Module
 ----------------------------------
 
-.. currentmodule:: slash.enums
+.. currentmodule:: appcommands.enums
 
 .. autoclass:: OptionType
     :members:
 
-slash.types Module
+appcommands.types Module
 ---------------------------------
 
-.. currentmodule:: slash.types
+.. currentmodule:: appcommands.types
 
 .. autoclass:: StoredCommand
     :members:
 
-slash.exceptions Module
+appcommands.exceptions Module
 ----------------------------------
 
-.. currentmodule:: slash.exceptions
+.. currentmodule:: appcommands.exceptions
 
 .. autoclass:: Error
     :members:

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 version = ''
 
-with open('slash/__init__.py') as f:
+with open('appcommands/__init__.py') as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 if version.endswith(('a', 'b', 'rc')):
@@ -27,10 +27,10 @@ if version.endswith(('a', 'b', 'rc')):
         pass
 
 setuptools.setup(
-    name="slash",
+    name="dpy-appcommands",
     version=version,
     author="SilentJungle399",
-    description="A simple module to use for slash commands in discord.py.",
+    description="A module for creating and using application commands on discord.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(exclude=["docs"]),
@@ -42,6 +42,9 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    project_urls={
+        "Documentation": "https://dpy-slash.rtfd.io/"
+    },
     python_requires=">=3.8",
     license="MIT"
 )

@@ -5,7 +5,7 @@ import asyncio
 import inspect
 import functools
 
-from .types import SlashClient
+from .types import AppClient
 from .enums import OptionType
 
 from discord import ui
@@ -123,8 +123,8 @@ class InteractionContext:
     ------------
     bot: Union[:class:`~discord.ext.commands.Bot`, :class:`~discord.ext.commands.AutoShardedBot`]
         The discord bot
-    client: :class:`~slash.client.SlashClient`
-        The slashclient on which this context is used 
+    client: :class:`~slash.client.AppClient`
+        The appclient on which this context is used 
     type: :class:`~int`
         Interaction type 
     guild: Union[:class:`~discord.Guild`, None]
@@ -137,9 +137,9 @@ class InteractionContext:
         The user who fired this cmd 
     token: :class:`~str`
         token of this interaction, (valid for 15 mins)"""
-    def __init__(self, bot: commands.Bot, client: SlashClient) -> None:
+    def __init__(self, bot: commands.Bot, client: AppClient) -> None:
         self.bot: commands.Bot = bot
-        self.client: SlashClient = client
+        self.client: AppClient = client
         self.__session: ClientSession = self.bot.http._HTTPClient__session
         self.version: int = None
         self.type: int = None
@@ -158,7 +158,7 @@ class InteractionContext:
         self.token = interaction.token
         self.id = interaction.id
         self.data = InteractionData.from_dict(interaction.data)
-        cmd = self.bot.slashclient.commands.get(self.data.id, None)['command']
+        cmd = self.bot.appclient.commands.get(self.data.id, None)['command']
         self.command = cmd
         params = copy.deepcopy(cmd.params)
         if cmd.cog and str(list(params.keys())[0]) in ("cls", "self"): # cls/self only
@@ -415,7 +415,7 @@ class Option:
 
 class SubCommand:
     def __init__(self,
-                 client: SlashClient,
+                 client: AppClient,
                  name: str = None,
                  description: str = "No description.",
                  options: List[Option] = [],
@@ -453,7 +453,7 @@ class SubCommand:
         return ret
 
     @classmethod
-    def from_dict(self, client: SlashClient, data: dict):
+    def from_dict(self, client: AppClient, data: dict):
         name = data.get("name")
         if "description" in data:
             description = data["description"]
@@ -477,7 +477,7 @@ class SubCommand:
 
 class SubCommandGroup:
     def __init__(self,
-                 client: SlashClient,
+                 client: AppClient,
                  name: str = None,
                  description: str = "No description.",
                  options: List[Option] = [],
@@ -518,7 +518,7 @@ class SubCommandGroup:
         return ret
 
     @classmethod
-    def from_dict(self, client: SlashClient, data: dict):
+    def from_dict(self, client: AppClient, data: dict):
         self.name = data["name"]
         self.type = int(data["type"]) if data.get("type",
                                                   None) is not None else None
@@ -556,8 +556,8 @@ class SlashCommand:
     
     Parameters
     ------------
-    client: :class:`~slash.client.SlashClient`
-       Your SlashClient instance, (required)
+    client: :class:`~slash.client.AppClient`
+       Your AppClient instance, (required)
     name: :class:`~str`
        Name of the cmd, (required)
     description: Optional[:class:`~str`]
@@ -577,7 +577,7 @@ class SlashCommand:
         Name not given when coroutine not given
     """
     def __init__(self,
-                 client: SlashClient,
+                 client: AppClient,
                  name: str = None,
                  description: Optional[str] = "No description.",
 				 guild: Optional[int] = None,
@@ -632,7 +632,7 @@ class SlashCommand:
         return self.__repr__()
 
     @classmethod
-    def from_dict(self, client: SlashClient, data: dict) -> 'SlashCommand':
+    def from_dict(self, client: AppClient, data: dict) -> 'SlashCommand':
         self.version = int(data["version"])
         self.application_id = int(data["application_id"])
         self.id = int(data["id"])
@@ -676,15 +676,13 @@ class SlashCommand:
         raise NotImplementedError
 
 
-
-
-def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
+def command(client: AppClient, *args, cls: SlashCommand = MISSING, **kwargs):
     """The slash commands wrapper 
     
     Parameters
     ------------
-    client: :class:`~slash.client.SlashClient`
-        Your slashclient instance, (required)
+    client: :class:`~slash.client.AppClient`
+        Your appclient instance, (required)
     name: :class:`~str`
         Name of the command, (required)
     description: Optional[:class:`~str`]
@@ -703,7 +701,7 @@ def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
     
         from slash.models import command
         
-        @command(bot.slashclient, name="hi", description="Hello!")
+        @command(bot.appclient, name="hi", description="Hello!")
         async def hi(ctx, user: discord.Member = None):
             user = user or ctx.user
             await ctx.reply(f"Hi {user.mention}")
