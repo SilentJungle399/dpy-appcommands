@@ -12,7 +12,7 @@ from discord import ui
 from discord import http
 from discord.ext import commands
 from aiohttp.client import ClientSession
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Coroutine, Callable
 
 
 __all__ = (
@@ -546,6 +546,10 @@ class SubCommandGroup:
     async def callback(self, *args, **kwargs):
         raise NotImplementedError
 
+MISSING = discord.utils.MISSING
+
+def missing(*args, **kwargs):
+    return MISSING
 
 class SlashCommand:
     """SlashCmd base class 
@@ -558,9 +562,11 @@ class SlashCommand:
        Name of the cmd, (required)
     description: Optional[:class:`~str`]
        description of the cmd, (optional)
+    guild: Optional[:class:`~str`]
+       id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
        options for your command, (optional)
-    callback: Optional[Coroutine[Callable]]
+    callback: Optional[Coroutine]
        the callback which is to be called when a command fires, (optional)
        
     Raises 
@@ -576,9 +582,9 @@ class SlashCommand:
                  description: Optional[str] = "No description.",
 				 guild: Optional[int] = None,
                  options: Optional[List[Option]] = [],
-                 callback = None,
+                 callback: Optional[Coroutine] = None,
                  subcommands: Optional[List[Union[SubCommandGroup,
-                                                  SubCommand]]] = []):
+                                                  SubCommand]]] = []) -> None:
         self.options = options
         self.client = client
         self.description = description
@@ -598,7 +604,7 @@ class SlashCommand:
             if not options or options == []:
                 self.options = generate_options(callback, description)
             self.callback = callback
-        elif (hasattr(self, 'callback') and callable(self.callback)):
+        elif (hasattr(self, 'callback') and self.callback is not MISSING):
             if not callback:
                 callback = self.callback
             if not asyncio.iscoroutinefunction(callback):
@@ -663,15 +669,14 @@ class SlashCommand:
             "description": self.description,
             "options": list(d.to_dict() for d in self.options)
         }
-        ret = {**ret}
         return ret
 
+    @missing
     async def callback(self, ctx: InteractionContext):
         raise NotImplementedError
 
 
 
-MISSING = discord.utils.MISSING
 
 def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
     """The slash commands wrapper 
@@ -684,6 +689,8 @@ def command(client: SlashClient, *args, cls: SlashCommand = MISSING, **kwargs):
         Name of the command, (required)
     description: Optional[:class:`~str`]
         Description of the command, (optional)
+    guild: Optional[:class:`~str`]
+        Id of the guild for which command is to be added, (optional)
     options: Optional[List[:class:`~slash.models.Option`]]
         Options for the command, detects automatically if None given, (optional)
     cls: :class:`~slash.models.SlashCommand`
