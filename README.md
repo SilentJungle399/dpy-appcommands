@@ -12,7 +12,7 @@ pip install -U git+https://github.com/SilentJungle399/dpy-appcommands
 
 For a headstart, here's an example
 but if you want to view full
-documentation on it then [`click here`](https://dpy-slash.rtfd.io)
+documentation on it then [`click here`](https://dpy-appcommands.rtfd.io)
 
 ```py
 import appcommands
