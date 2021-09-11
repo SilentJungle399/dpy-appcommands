@@ -5,7 +5,7 @@
 To install this version, run
 
 ```bash
-pip install -U git+https://github.com/SilentJungle399/dpy-appcommands@v1
+pip install -U git+https://github.com/SilentJungle399/dpy-appcommands
 ```
 
 ### Usage
