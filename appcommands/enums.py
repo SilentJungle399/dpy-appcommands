@@ -60,6 +60,9 @@ class OptionType(IntEnum):
             if isinstance(t, typing._Union):  # noqa
                 return cls.MENTIONABLE
 
+        if issubclass(t, discord.Object):
+            return cls.MENTIONABLE
+
         if issubclass(t, float):
             return cls.FLOAT
 
