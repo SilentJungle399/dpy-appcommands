@@ -107,7 +107,7 @@ def generate_options(function, description: str = "No description."):
 
         if isinstance(param.annotation, Option):
             kw=param.annotation.to_dict()
-            kw["value"] = name
+            kw["value"] = param.name
             options.append(Option.from_dict(kw))
         else:
             option_type = (OptionType.from_type(param.annotation)
