@@ -412,7 +412,7 @@ class Option:
         type = data.get("type")
         choices = []
         if data.get("choices"):
-            for choice in choices:
+            for choice in data.get('choices'):
                 choices.append(Choice(**choice))
         return cls(name, description, type, required, value, choices)
 
