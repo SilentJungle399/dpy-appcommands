@@ -115,6 +115,7 @@ def generate_options(function, description: str = "No description."):
                 Option(name, description or "No description", option_type,
                        required))
 
+    print(options)
     return options
 
 
