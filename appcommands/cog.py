@@ -115,7 +115,7 @@ class SlashCog(Cog):
             new_cmd.cog = self
             func.__slash__ = new_cmd
             bot.loop.create_task(bot.appclient.add_command(func.__slash__))
-            new_list.append(cmd)
+            new_list.append(new_cmd)
             setattr(self.__class__, new_cmd.callback.__name__, func)
             setattr(self, new_cmd.name, new_cmd.callback)
 
