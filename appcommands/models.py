@@ -105,12 +105,17 @@ def generate_options(function, description: str = "No description."):
                 param = param.replace(annotation=args[0])
                 required = not isinstance(args[-1], type(None))
 
-        option_type = (OptionType.from_type(param.annotation)
-                       or OptionType.STRING)
-        name = param.name
-        options.append(
-            Option(name, description or "No description", option_type,
-                   required))
+        if isinstance(param.annotation, Option):
+            kw=param.annotation.to_dict()
+            kw["name"] = param.name
+            options.append(Option.from_dict(kw))
+        else:
+            option_type = (OptionType.from_type(param.annotation)
+                           or OptionType.STRING)
+            name = param.name
+            options.append(
+                Option(name, description or "No description", option_type,
+                       required))
 
     return options
 
@@ -407,7 +412,7 @@ class Option:
         type = data.get("type")
         choices = []
         if data.get("choices"):
-            for choice in choices:
+            for choice in data.get('choices'):
                 choices.append(Choice(**choice))
         return cls(name, description, type, required, value, choices)
 
