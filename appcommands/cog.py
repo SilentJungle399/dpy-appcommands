@@ -119,7 +119,7 @@ class SlashCog(Cog):
             setattr(self.__class__, new_cmd.callback.__name__, func)
             print(getattr(self.__class__, new_cmd.callback.__name__))
             #setattr(self, new_cmd.name, new_cmd.callback)
-            print(getattr(self, new_cmd.name))
+            #print(getattr(self, new_cmd.name))
 
         self.__slash_commands__ = tuple(c for c in new_list)
         return super()._inject(bot)
