@@ -71,7 +71,6 @@ class Bot(commands.Bot):
         """
         return self.appclient.command(*args, **kwargs)
 
-    @missing
     def get_app_client(self):
         """The method usually implemented to use custom appclient"""
         return AppClient(self)
@@ -133,7 +132,6 @@ class AutoShardedBot(commands.AutoShardedBot):
         """
         return self.appclient.command(*args, **kwargs)
 
-    @missing
     def get_app_client(self):
         """The method usually implemented to use custom appclient"""
         return AppClient(self)
@@ -235,7 +233,6 @@ class AppClient:
         if self.logging:
             print(message)
 
-    @missing
     def get_interaction_context(self):
         """The method usually implemented to use custom contexts"""
         return InteractionContext(self.bot, self)
