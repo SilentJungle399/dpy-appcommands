@@ -31,7 +31,7 @@ class Bot(commands.Bot):
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        self.appclient = AppClient(self)
+        self.appclient = self.get_app_client()
 
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
@@ -70,6 +70,11 @@ class Bot(commands.Bot):
             The slash command.
         """
         return self.appclient.command(*args, **kwargs)
+
+    @missing
+    def get_app_client(self):
+        """The method usually implemented to use custom appclient"""
+        return AppClient(self)
 
 class AutoShardedBot(commands.AutoShardedBot):
     """The AutoShardedBot class
@@ -88,7 +93,7 @@ class AutoShardedBot(commands.AutoShardedBot):
     def __init__(self, **options):
         """Constructor"""
         super().__init__(**options)
-        self.appclient = AppClient(self)
+        self.appclient = self.get_app_client()
 
     def slash(self, *args, **kwargs) -> SlashCommand:
         """Adds a command to bot
@@ -128,6 +133,10 @@ class AutoShardedBot(commands.AutoShardedBot):
         """
         return self.appclient.command(*args, **kwargs)
 
+    @missing
+    def get_app_client(self):
+        """The method usually implemented to use custom appclient"""
+        return AppClient(self)
 
 class AppClient:
     """Slash Client handler class for bot
@@ -226,12 +235,16 @@ class AppClient:
         if self.logging:
             print(message)
 
+    @missing
+    def get_interaction_context(self):
+        """The method usually implemented to use custom contexts"""
+        return InteractionContext(self.bot, self)
+
     async def socket_resp(self, interaction):
         if interaction.type == InteractionType.application_command:
             if int(interaction.data['id']) in self.__commands:
                 command = self.__commands[int(interaction.data['id'])]
-                context = await InteractionContext(
-                    self.bot, self).from_interaction(interaction)
+                context = await (self.get_interaction_context()).from_interaction(interaction)
 
                 cmd = (command['command'])
                 if cmd.cog:
